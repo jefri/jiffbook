@@ -1,7 +1,7 @@
 import { NodeFileSystem } from "@davidsouther/jiffies/lib/esm/fs_node.js";
 import { join, normalize } from "node:path";
 import { Args } from "./args.js";
-import { load } from "./content.js";
+import { load } from "./load.js";
 import {
   FileSystem,
   FileSystemAdapter,
@@ -11,6 +11,7 @@ import * as gitignoreParser from "gitignore-parser";
 
 export interface JiffdownSettings {
   out: string;
+  toc_depth: number;
 }
 
 function cwdNormalize(path: string) {
@@ -22,6 +23,7 @@ export async function loadFs(args: Args) {
   const fs = new GitAwareFs(new NodeFileSystem(), root);
   const settings = {
     out: join(args.values.root!, args.values.out!),
+    toc_depth: Number.parseInt(args.values["toc-depth"] ?? "99999"),
   };
 
   let book = await load(fs);
