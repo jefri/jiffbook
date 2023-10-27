@@ -9,6 +9,7 @@ import {
   TableOfContents,
 } from "./components.js";
 import { isSectionContent } from "./sections.js";
+import { aside, footer, header, main, nav, style } from "./dom.js";
 
 export async function writeSingle({
   fs,
@@ -28,11 +29,32 @@ export async function writeSingle({
   fs.cd(settings.out);
 
   const page = Layout(
-    ...Cover(book),
-    TableOfContents(book, settings.toc_depth),
-    ...book.chapters.map(SectionComponent).flat()
+    header({ className: "fluid" }, nav(...Cover(book, true))),
+    main(...book.chapters.map(SectionComponent).flat()),
+    aside({ id: "toc" }, nav(TableOfContents(book, settings.toc_depth))),
+    footer(
+      { className: "fluid" },
+      `©${new Date().getFullYear()} ${book.cover.author}`
+    ),
+    style(singleStyle)
   );
   await fs.writeFile("index.html", page);
   fs.popd();
   return null;
 }
+
+const singleStyle = `
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Poppins:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+:root {
+  --font-family-base: Poppins;
+  --font-family-header: "Libre Baskerville";
+}
+
+nav .breadcrumbs li {
+  display: inline-block;
+  margin-left: 1em;
+}
+nav .breadcrumbs::marker {
+  content: '→';
+`;
