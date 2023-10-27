@@ -30,8 +30,8 @@ export async function writeSingle({
 
   const page = Layout(
     header({ className: "fluid" }, nav(...Cover(book, true))),
-    main(...book.chapters.map(SectionComponent).flat()),
-    aside({ id: "toc" }, nav(TableOfContents(book, settings.toc_depth))),
+    main(...book.chapters.map((s) => SectionComponent(s, true)).flat()),
+    aside({ id: "toc" }, nav(TableOfContents(book, settings.toc_depth, true))),
     footer(
       { className: "fluid" },
       `©${new Date().getFullYear()} ${book.cover.author}`

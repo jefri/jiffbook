@@ -159,6 +159,11 @@ export function SectionComponent(section: Section, single: boolean): string[] {
   if (isSectionContent(section)) {
     return [SectionMain(section, single)];
   } else {
-    return section.sections.map((s) => SectionComponent(s, single)).flat();
+    return [
+      section.parent
+        ? nav({ id: SectionId(section) }, ...Breadcrumbs(section, single))
+        : h2({ id: SectionId(section) }, section.title),
+      ...section.sections.map((s) => SectionComponent(s, single)).flat(),
+    ];
   }
 }
