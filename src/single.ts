@@ -55,6 +55,16 @@ nav .breadcrumbs li {
   display: inline-block;
   margin-left: 1em;
 }
-nav .breadcrumbs::marker {
+
+nav .breadcrumbs li::marker {
   content: '→';
+}
+
+:is(body,#body,#root)>aside:has(>nav) {
+  width: min-content;
+}
+
+aside nav ul li a {
+  white-space: nowrap;
+}
 `;
