@@ -1,14 +1,12 @@
 import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
 import { JiffdownSettings } from "./fs.js";
-import { Book, Section } from "./types.js";
+import { Book } from "./types.js";
 import {
   Cover,
   Layout,
   SectionComponent,
-  SectionMain,
   TableOfContents,
 } from "./components.js";
-import { isSectionContent } from "./sections.js";
 import { aside, footer, header, main, nav, style } from "./dom.js";
 
 export async function writeSingle({

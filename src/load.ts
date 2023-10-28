@@ -74,23 +74,26 @@ export function slugToName(slug: string): string {
 async function loadSectionFromFolder(
   fs: FileSystem,
   slug: string
-): Promise<SectionFolder> {
+): Promise<SectionFolder | undefined> {
   fs.pushd(slug);
   const rc = await fs.readFile(".jiffbookrc").catch((_) => "");
-  const rcYaml = yaml.parse(rc) ?? {};
-  const title = rcYaml["title"] ?? slugToName(slug);
+  const data = yaml.parse(rc) ?? {};
+  if (data["skip"]) return;
+  const title = data["title"] ?? slugToName(slug);
   const entries = (await fs.scandir(".")).filter(
     (e) => e.name.match(/\d+_/) !== null
   );
 
   const sections: Section[] = [];
   for (const entry of entries) {
-    let slug = entry.name;
+    const slug = entry.name;
+    let section: Section | undefined;
     if (entry.isDirectory()) {
-      sections.push(await loadSectionFromFolder(fs, slug));
+      section = await loadSectionFromFolder(fs, slug);
     } else if (slug.endsWith(".md")) {
-      sections.push(await loadSectionFromFile(fs, slug));
+      section = await loadSectionFromFile(fs, slug);
     }
+    if (section) sections.push(section);
   }
 
   fs.popd();
@@ -105,9 +108,10 @@ async function loadSectionFromFolder(
 async function loadSectionFromFile(
   fs: FileSystem,
   slug: string
-): Promise<SectionContent> {
+): Promise<SectionContent | undefined> {
   const file = await fs.readFile(slug);
   const { content: markdown, data } = matter(file);
+  if (data["skip"]) return;
   slug = slug.replace(/\.md$/, "");
   const title = data["title"] ?? slugToName(slug);
   return {
