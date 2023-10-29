@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "test": "vitest src/**/*_test.ts"
+    "test": "vitest"
   },
   "bin": {
     "jiffbook": "dist/index.js"

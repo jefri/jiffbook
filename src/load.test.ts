@@ -5,7 +5,7 @@ import {
 import { load, slugToName } from "./load.js";
 import { test, expect } from "vitest";
 import { Book } from "./types.js";
-import { GitAwareFs } from "./fs.js";
+import { GitAwareFs, JiffdownSettings } from "./fs.js";
 
 test("load cover", async () => {
   const fs = new FileSystem(
@@ -14,7 +14,7 @@ test("load cover", async () => {
     })
   );
 
-  const book = await load(fs);
+  const book = await load(fs, {} as JiffdownSettings);
 
   expect(book).toEqual<Book>({
     cover: {
@@ -51,7 +51,7 @@ test("load chapters", async () => {
     })
   );
 
-  const book = await load(fs);
+  const book = await load(fs, {} as JiffdownSettings);
   const expected = {
     cover: {
       title: "Medina-99",
@@ -61,37 +61,44 @@ test("load chapters", async () => {
       {
         slug: "01_intro",
         title: "Intro",
+        book: {} as Book,
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
+            book: {} as Book,
           },
           {
             slug: "02_foo",
             title: "Foo",
             markdown: "foo",
+            book: {} as Book,
           },
           {
             slug: "03_bar",
             title: "Bar",
             markdown: "bar",
+            book: {} as Book,
           },
         ],
       },
       {
         slug: "02_part_2",
         title: "Second Part",
+        book: {} as Book,
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "World",
+            book: {} as Book,
           },
           {
             slug: "02_foo_bar_baz",
             title: "Quick Brown",
             markdown: "The foxy fox",
+            book: {} as Book,
           },
         ],
       },
@@ -125,7 +132,7 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
     })
   );
 
-  const book = await load(fs);
+  const book = await load(fs, {} as JiffdownSettings);
   const expected = {
     cover: {
       title: "Medina-99",
@@ -136,17 +143,56 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
         slug: "01_intro",
         title: "Intro",
         parent: undefined,
+        book: {} as Book,
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
+            book: {} as Book,
           },
         ],
       },
     ],
   };
   (expected.chapters[0].sections[0] as any).parent = expected.chapters[0];
+  expected.chapters[0].book = expected;
+  (expected.chapters[0].sections[0] as any).book = expected;
+
+  expect(book).toEqual<Book>(expected);
+});
+
+test("load chapters ignores skip", async () => {
+  const fs = new GitAwareFs(
+    new ObjectFileSystemAdapter({
+      ".jiffbookrc": `title: Medina-99\nauthor: David Souther\n`,
+      "01_intro": {
+        ".jiffbookrc": "skip: true",
+        "01_hello.md": "Hello",
+      },
+      "02_other": {
+        "02_skip.md": "---\nskip: true\n---\n",
+      },
+    })
+  );
+
+  const book = await load(fs, {} as JiffdownSettings);
+  const expected = {
+    cover: {
+      title: "Medina-99",
+      author: "David Souther",
+    },
+    chapters: [
+      {
+        slug: "02_other",
+        title: "Other",
+        parent: undefined,
+        sections: [],
+        book: {} as Book,
+      },
+    ],
+  };
+  expected.chapters[0].book = expected;
 
   expect(book).toEqual<Book>(expected);
 });

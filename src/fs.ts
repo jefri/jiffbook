@@ -26,7 +26,7 @@ export async function loadFs(args: Args) {
     toc_depth: Number.parseInt(args.values["toc-depth"] ?? "99999"),
   };
 
-  let book = await load(fs);
+  let book = await load(fs, settings);
 
   return { fs, settings, book };
 }

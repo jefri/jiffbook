@@ -15,11 +15,6 @@ export function makeArgs(argv = process.argv) {
         short: "o",
         default: "out",
       },
-      single: {
-        type: "boolean",
-        short: "s",
-        default: false,
-      },
       "toc-depth": {
         type: "string",
         default: "",
@@ -36,7 +31,6 @@ export function help(): never {
   options:
     -r, --root sets the base folder to read a jiffdoc book from. Default: ${process.cwd()}
     -o, --out sets the target folder to generate the jiffdoc book HTML to. Default: ${process.cwd()}/out
-    -s, --single generates a single index.html file. Default: false
     --toc-depth <number> The maximum depth of table of contents entries. Default: "" (no max depth).
 
     -h, --help will print this message and exit.

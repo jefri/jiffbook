@@ -5,7 +5,7 @@ import {
 import { markSectionParents } from "./load.js";
 import { test, expect } from "vitest";
 import { Book } from "./types.js";
-import { writeSingle } from "./single.js";
+import { writeOut } from "./out.js";
 
 test("writes content", async () => {
   const book: Book = {
@@ -22,20 +22,25 @@ test("writes content", async () => {
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
+            book: {} as Book,
           },
           {
             slug: "02_foo",
             title: "Foo",
             markdown: "foo",
+            book: {} as Book,
           },
           {
             slug: "03_bar",
             title: "Bar",
             markdown: "bar",
+            book: {} as Book,
           },
         ],
+        book: {} as Book,
       },
       {
+        book: {} as Book,
         slug: "02_part_2",
         title: "Second Part",
         sections: [
@@ -43,23 +48,25 @@ test("writes content", async () => {
             slug: "01_hello",
             title: "Hello",
             markdown: "World",
+            book: {} as Book,
           },
           {
             slug: "02_foo_bar_baz",
             title: "Quick Brown",
             markdown: "The foxy fox",
+            book: {} as Book,
           },
         ],
       },
     ],
   };
   for (const chapter of book.chapters) {
-    markSectionParents(chapter);
+    markSectionParents(chapter, book);
   }
 
   const fs = new FileSystem(new ObjectFileSystemAdapter({}));
 
-  await writeSingle({
+  await writeOut({
     fs,
     settings: { out: "book", toc_depth: Number.MAX_SAFE_INTEGER },
     book,

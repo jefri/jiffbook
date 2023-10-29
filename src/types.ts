@@ -12,6 +12,7 @@ export interface Book {
 export interface SectionBase {
   slug: string; // From basename.
   title: string; // Given in metadata, or inferred from basename.
+  book: Book;
   parent?: SectionFolder; // Makes it easy to look up the breadcrumb.
 }
 export interface SectionFolder extends SectionBase {

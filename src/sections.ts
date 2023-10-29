@@ -15,7 +15,7 @@ export function pathForSection(section: SectionContent) {
   return `${section.slug}.html`;
 }
 
-export function nextSection(section: Section): SectionContent | undefined {
+export function nextSection(section: Section): Section | undefined {
   // No parent, no next section.
   if (!section.parent) return undefined;
 
@@ -25,22 +25,10 @@ export function nextSection(section: Section): SectionContent | undefined {
   }
 
   const position = section.parent.sections.indexOf(section);
-  return firstSectionContent(section.parent.sections[position + 1]);
+  return section.parent.sections[position + 1];
 }
 
-function firstSectionContent(
-  section: Section | undefined
-): SectionContent | undefined {
-  if (section == undefined) return undefined;
-  // Walk first children until we come to a leaf
-  if (isSectionContent(section)) {
-    return section;
-  } else {
-    return firstSectionContent(section.sections[0]);
-  }
-}
-
-export function previousSection(section: Section): SectionContent | undefined {
+export function previousSection(section: Section): Section | undefined {
   if (!section.parent) return undefined;
 
   if (section === section.parent.sections.at(0)) {
@@ -48,17 +36,5 @@ export function previousSection(section: Section): SectionContent | undefined {
   }
 
   const position = section.parent.sections.indexOf(section);
-  return previousSectionContent(section.parent.sections[position - 1]);
-}
-
-function previousSectionContent(
-  section: Section | undefined
-): SectionContent | undefined {
-  if (section == undefined) return undefined;
-  // Walk first children until we come to a leaf
-  if (isSectionContent(section)) {
-    return section;
-  } else {
-    return previousSectionContent(section.sections.at(-1)!);
-  }
+  return section.parent.sections[position - 1];
 }

@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
 import { isSectionContent } from "./sections.js";
 import { Book, Section, SectionContent, SectionFolder } from "./types.js";
+import { JiffdownSettings } from "./fs.js";
 
 /**
  * 1. Use package.json['jiffbook'] or '.jiffbookrc', taking first in order.
@@ -18,13 +19,10 @@ import { Book, Section, SectionContent, SectionFolder } from "./types.js";
  * @param fs the FileSystem to read from, starting at the FS' CWD.
  * @returns
  */
-export async function load(fs: FileSystem): Promise<Book> {
-  const book = await loadBook(fs);
-
-  return book;
-}
-
-export async function loadBook(fs: FileSystem): Promise<Book> {
+export async function load(
+  fs: FileSystem,
+  args: JiffdownSettings
+): Promise<Book> {
   let rc: Record<string, string>;
   try {
     let packageJson = await fs.readFile("package.json");
@@ -42,19 +40,13 @@ export async function loadBook(fs: FileSystem): Promise<Book> {
   const title = rc["title"] ?? "Unknown Title";
   const author = rc["author"] ?? "Unknown Author";
   const image = rc["cover"];
+  if (rc["toc_depth"]) {
+    args["toc_depth"] = Number(rc["toc_depth"]);
+  }
 
   const chapters: Section[] = [];
-  const dirs = (await fs.scandir(".")).filter((s) => s.isDirectory());
-  for (const dir of dirs) {
-    const section = await loadSectionFromFolder(fs, dir.name);
-    chapters.push(section);
-  }
 
-  for (const section of chapters) {
-    markSectionParents(section);
-  }
-
-  return {
+  const book = {
     cover: {
       title,
       author,
@@ -62,6 +54,18 @@ export async function loadBook(fs: FileSystem): Promise<Book> {
     },
     chapters,
   };
+
+  const dirs = (await fs.scandir(".")).filter((s) => s.isDirectory());
+  for (const dir of dirs) {
+    const section = await loadSectionFromFolder(fs, dir.name);
+    if (section) chapters.push(section);
+  }
+
+  for (const section of chapters) {
+    markSectionParents(section, book);
+  }
+
+  return book;
 }
 
 export function slugToName(slug: string): string {
@@ -102,6 +106,7 @@ async function loadSectionFromFolder(
     slug,
     title,
     sections,
+    book: {} as Book,
   };
 }
 
@@ -118,17 +123,20 @@ async function loadSectionFromFile(
     slug,
     title,
     markdown,
+    book: {} as Book,
   };
 }
 
 export function markSectionParents(
   section: Section,
+  book: Book,
   parent?: SectionFolder
 ): void {
+  section.book = book;
   section.parent = parent;
   if (!isSectionContent(section)) {
     for (const s of section.sections) {
-      markSectionParents(s, section);
+      markSectionParents(s, book, section);
     }
   }
 }
