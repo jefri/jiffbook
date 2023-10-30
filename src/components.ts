@@ -62,7 +62,15 @@ export function Cover(book: Book, single = false): string[] {
     h1(A({ href: "/" }, book.cover.title)),
     ...(book.cover.subtitle ? [] : h2(book.cover.subtitle)),
     h3("By ", book.cover.author),
-    ...(single ? [] : [A({ href: "./toc.html" }, "Table of Contents")]),
+    ...(single
+      ? []
+      : [
+          div(
+            A({ href: "./toc.html" }, "Table of Contents"),
+            " ",
+            A({ href: "./single.html" }, "Single Page")
+          ),
+        ]),
   ];
 }
 
