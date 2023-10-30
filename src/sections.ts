@@ -38,3 +38,7 @@ export function previousSection(section: Section): Section | undefined {
   const position = section.parent.sections.indexOf(section);
   return section.parent.sections[position - 1];
 }
+
+export function sectionId(section: Section): string {
+  return sectionBreadcrumbs(section).reverse().join("_");
+}

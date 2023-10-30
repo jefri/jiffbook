@@ -2,6 +2,7 @@ import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
 import { JiffdownSettings } from "./fs.js";
 import { isSectionContent, pathForSection } from "./sections.js";
 import { Book, Section } from "./types.js";
+import { div, main } from "./dom.js";
 import {
   Cover,
   Layout,
@@ -9,9 +10,8 @@ import {
   SectionPage,
   SectionTOCPage,
   Single,
-  TableOfContents,
-} from "./components.js";
-import { div, main } from "./dom.js";
+} from "./components/pages.js";
+import { TableOfContents } from "./components/contents.js";
 
 export async function writeOut({
   fs,
@@ -48,11 +48,8 @@ async function writeSection(
   } else {
     await fs.mkdir(section.slug);
     await fs.pushd(section.slug);
-    await writeHtmlPage(
-      fs,
-      "index.html",
-      SectionTOCPage(section, depth, false)
-    );
+    await writeHtmlPage(fs, "index.html", SectionPage(section, true));
+    await writeHtmlPage(fs, "toc.html", SectionTOCPage(section, depth, false));
     for (const s of section.sections) {
       await writeSection(fs, s);
     }
