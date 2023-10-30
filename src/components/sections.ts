@@ -16,16 +16,16 @@ import {
 } from "../sections.js";
 import { Section } from "../types.js";
 import { marked } from "marked";
-import { Breadcrumbs } from "./contents.js";
+import { Breadcrumbs, LinkMode } from "./contents.js";
 import { A } from "./util.js";
 
-export function SectionArticle(section: Section, single: boolean): string {
+export function SectionArticle(section: Section, links: LinkMode): string {
   return article(
     { id: sectionId(section) },
     header(
       nav(
         h1(section.title),
-        Breadcrumbs(section, single),
+        Breadcrumbs(section, links),
         A({ href: "#" }, "Top")
       )
     ),
@@ -35,29 +35,29 @@ export function SectionArticle(section: Section, single: boolean): string {
 
 export function SectionNextLink(
   section: Section,
-  single: boolean
+  links: LinkMode
 ): string | undefined {
   let next = nextSection(section);
   if (!next) return undefined;
-  return SectionLink(next, single, `Next: ${next.title}`);
+  return SectionLink(next, links, `Next: ${next.title}`);
 }
 
 export function SectionPreviousLink(
   section: Section,
-  single: boolean
+  links: LinkMode
 ): string | undefined {
   let previous = previousSection(section);
   if (!previous) return undefined;
-  return SectionLink(previous, single, `Previous: ${previous.title}`);
+  return SectionLink(previous, links, `Previous: ${previous.title}`);
 }
 
 export function SectionLink(
   section: Section,
-  single: boolean,
+  links: LinkMode,
   text = section.title
 ): string {
   let href;
-  if (single) {
+  if (links === "hash") {
     href = "#" + encodeURIComponent(sectionId(section));
   } else {
     if (isSectionContent(section)) {
@@ -70,18 +70,18 @@ export function SectionLink(
   return A({ href }, text);
 }
 
-export function SectionComponent(section: Section, single: boolean): string {
+export function SectionComponent(section: Section, links: LinkMode): string {
   if (isSectionContent(section)) {
-    return SectionArticle(section, single);
+    return SectionArticle(section, links);
   } else {
     return sectionDOM(
       header(
         section.parent
-          ? nav({ id: sectionId(section) }, ...Breadcrumbs(section, single))
+          ? nav({ id: sectionId(section) }, ...Breadcrumbs(section, links))
           : h2({ id: sectionId(section) }, section.title)
       ),
       main(marked.parse(section.markdown).trim()),
-      ...section.sections.map((s) => SectionComponent(s, single))
+      ...section.sections.map((s) => SectionComponent(s, links))
     );
   }
 }

@@ -28,7 +28,13 @@ export async function writeOut({
   await writeHtmlPage(
     fs,
     "toc.html",
-    Page(book, main({ className: "table-of-contents" }, TableOfContents(book)))
+    Page(
+      book,
+      main(
+        { className: "table-of-contents" },
+        TableOfContents(book, 999, "absolute")
+      )
+    )
   );
   for (const chapter of book.chapters) {
     await writeSection(fs, chapter);
@@ -44,12 +50,12 @@ async function writeSection(
 ) {
   if (isSectionContent(section)) {
     const path = pathForSection(section);
-    writeHtmlPage(fs, path, SectionPage(section, false));
+    writeHtmlPage(fs, path, SectionPage(section, "hash"));
   } else {
     await fs.mkdir(section.slug);
     await fs.pushd(section.slug);
-    await writeHtmlPage(fs, "index.html", SectionPage(section, true));
-    await writeHtmlPage(fs, "toc.html", SectionTOCPage(section, depth, false));
+    await writeHtmlPage(fs, "index.html", SectionPage(section, "hash"));
+    await writeHtmlPage(fs, "toc.html", SectionTOCPage(section, depth, "hash"));
     for (const s of section.sections) {
       await writeSection(fs, s);
     }

@@ -8,52 +8,57 @@ import {
 } from "./sections.js";
 import { A } from "./util.js";
 
+export type LinkMode = "hash" | "relative" | "absolute";
+
 export function TableOfContents(
   book: Book,
   depth = Number.MAX_SAFE_INTEGER,
-  single = false
+  links: LinkMode
 ): string {
-  return TableOfContentsList(book.chapters, depth, single);
+  return TableOfContentsList(book.chapters, depth, links);
 }
 
 export function TableOfContentsList(
   sections: Section[],
   depth: number,
-  single: boolean
+  links: LinkMode
 ): string {
   if (sections.length === 0) return "";
   if (sectionBreadcrumbs(sections[0]).length > depth) return "";
-  return ul(...sections.map((s) => TableOfContentsEntry(s, depth, single)));
+  return ul(...sections.map((s) => TableOfContentsEntry(s, depth, links)));
 }
 
 export function TableOfContentsEntry(
   section: Section,
   depth: number,
-  single: boolean
+  links: LinkMode
 ): string {
   return li(
-    SectionLink(section, single),
-    TableOfContentsList(section.sections, depth, single)
+    SectionLink(section, links),
+    TableOfContentsList(section.sections, depth, links)
   );
 }
 
-export function Breadcrumbs(section: Section, single: boolean): string {
-  let links = [];
+export function Breadcrumbs(section: Section, links: LinkMode): string {
+  let breadcrumbs = [];
   while (section) {
-    links.push(SectionLink(section, single));
+    breadcrumbs.push(SectionLink(section, links));
     section = section.parent!;
   }
-  return ol({ className: "breadcrumbs" }, ...links.reverse().map((l) => li(l)));
+  return ol(
+    { className: "breadcrumbs" },
+    ...breadcrumbs.reverse().map((l) => li(l))
+  );
 }
 
-export function SectionNav(section: Section, single: boolean): string {
-  const links = [
-    SectionPreviousLink(section, single),
+export function SectionNav(section: Section, links: LinkMode): string {
+  const navs = [
+    SectionPreviousLink(section, links),
     A({ href: "/index.html" }, "Cover"),
     A({ href: "/toc.html" }, "Contents"),
-    SectionNextLink(section, single),
+    SectionNextLink(section, links),
   ]
     .filter((p) => p != undefined)
     .map((l) => li(l));
-  return nav(ul(...links));
+  return nav(ol(...navs));
 }

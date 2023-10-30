@@ -21,6 +21,7 @@ import { A } from "./util.js";
 import { JiffdownSettings } from "src/fs.js";
 import {
   Breadcrumbs,
+  LinkMode,
   TableOfContents,
   TableOfContentsList,
 } from "./contents.js";
@@ -65,10 +66,12 @@ export function Footer(book: Book): string {
 export function Cover(book: Book, single = false, chapter?: Section): string[] {
   return chapter
     ? [
+        "<!-- Cover -->",
         h1(A({ href: "/" }, book.cover.title)),
         h2(A({ href: "." }, chapter.title)),
       ]
     : [
+        "<!-- Cover -->",
         h1(A({ href: "/" }, book.cover.title)),
         ...(book.cover.subtitle ? [] : h2(book.cover.subtitle)),
         h3("By ", book.cover.author),
@@ -93,10 +96,10 @@ export function Single({
 }): string[] {
   return [
     Header(book),
-    main(...book.chapters.map((s) => SectionComponent(s, true)).flat()),
+    main(...book.chapters.map((s) => SectionComponent(s, "hash")).flat()),
     aside(
       { id: "toc" },
-      nav(...TableOfContents(book, settings.toc_depth, true))
+      nav(...TableOfContents(book, settings.toc_depth, "hash"))
     ),
     Footer(book),
   ];
@@ -113,10 +116,10 @@ export function Chapter({
 }): string[] {
   return [
     Header(book, chapter),
-    main(...SectionComponent(chapter, true)),
+    main(...SectionComponent(chapter, "hash")),
     aside(
       { id: "toc" },
-      nav(...TableOfContents(book, settings.toc_depth, true))
+      nav(...TableOfContents(book, settings.toc_depth, "hash"))
     ),
     Footer(book),
   ];
@@ -125,24 +128,24 @@ export function Chapter({
 export function SectionTOCPage(
   section: Section,
   depth: number = Number.MAX_SAFE_INTEGER,
-  single: boolean
+  links: LinkMode
 ): string[] {
   return Page(
     section.book,
     main(
-      Breadcrumbs(section, single),
+      Breadcrumbs(section, links),
       div(
         { className: "table-of-contents" },
-        TableOfContentsList(section.sections, depth, single)
+        TableOfContentsList(section.sections, depth, links)
       )
     )
   );
 }
 
-export function SectionPage(section: Section, single: boolean): string[] {
+export function SectionPage(section: Section, links: LinkMode): string[] {
   return [
     Header(section.book),
-    main(...SectionComponent(section, single)),
+    main(...SectionComponent(section, links)),
     Footer(section.book),
   ];
 }
