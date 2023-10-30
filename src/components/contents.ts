@@ -1,6 +1,6 @@
 import { li, nav, ol, ul } from "../dom.js";
 import { sectionBreadcrumbs } from "../sections.js";
-import { Book, Section, SectionFolder } from "../types.js";
+import { Book, Section } from "../types.js";
 import {
   SectionLink,
   SectionNextLink,
@@ -21,6 +21,7 @@ export function TableOfContentsList(
   depth: number,
   single: boolean
 ): string {
+  if (sections.length === 0) return "";
   if (sectionBreadcrumbs(sections[0]).length > depth) return "";
   return ul(...sections.map((s) => TableOfContentsEntry(s, depth, single)));
 }
@@ -32,9 +33,7 @@ export function TableOfContentsEntry(
 ): string {
   return li(
     SectionLink(section, single),
-    ...((section as SectionFolder).sections
-      ? TableOfContentsList((section as SectionFolder).sections, depth, single)
-      : "")
+    TableOfContentsList(section.sections, depth, single)
   );
 }
 

@@ -17,23 +17,27 @@ test("writes content", async () => {
       {
         slug: "01_intro",
         title: "Intro",
+        markdown: "",
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
+            sections: [],
             book: {} as Book,
           },
           {
             slug: "02_foo",
             title: "Foo",
             markdown: "foo",
+            sections: [],
             book: {} as Book,
           },
           {
             slug: "03_bar",
             title: "Bar",
             markdown: "bar",
+            sections: [],
             book: {} as Book,
           },
         ],
@@ -43,17 +47,20 @@ test("writes content", async () => {
         book: {} as Book,
         slug: "02_part_2",
         title: "Second Part",
+        markdown: "",
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "World",
+            sections: [],
             book: {} as Book,
           },
           {
             slug: "02_foo_bar_baz",
             title: "Quick Brown",
             markdown: "The foxy fox",
+            sections: [],
             book: {} as Book,
           },
         ],

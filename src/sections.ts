@@ -1,7 +1,7 @@
-import { Section, SectionContent } from "./types.js";
+import { Section } from "./types.js";
 
-export function isSectionContent(section: Section): section is SectionContent {
-  return typeof (section as SectionContent)?.markdown == "string";
+export function isSectionContent(section: Section): boolean {
+  return section.sections.length === 0;
 }
 
 export function sectionBreadcrumbs(section: Section): string[] {
@@ -11,7 +11,7 @@ export function sectionBreadcrumbs(section: Section): string[] {
   ];
 }
 
-export function pathForSection(section: SectionContent) {
+export function pathForSection(section: Section) {
   return `${section.slug}.html`;
 }
 

@@ -9,22 +9,15 @@ export interface Book {
   chapters: Section[];
 }
 
-export interface SectionBase {
+export interface Section {
   slug: string; // From basename.
   title: string; // Given in metadata, or inferred from basename.
   book: Book;
-  parent?: SectionFolder; // Makes it easy to look up the breadcrumb.
-}
-export interface SectionFolder extends SectionBase {
+  parent?: Section; // Makes it easy to look up the breadcrumb.
   sections: Section[];
-}
-
-export interface SectionContent extends SectionBase {
   markdown: string;
   images?: Image[];
 }
-
-export type Section = SectionContent | SectionFolder;
 
 export interface Image {
   source: string;

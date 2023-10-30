@@ -16,7 +16,7 @@ import {
   script,
   style,
 } from "../dom.js";
-import { Book, Section, SectionFolder } from "../types.js";
+import { Book, Section } from "../types.js";
 import { A } from "./util.js";
 import { JiffdownSettings } from "src/fs.js";
 import {
@@ -48,7 +48,7 @@ export function Layout(...content: string[]): string {
 }
 
 export function Page(book: Book, ...contents: string[]): string[] {
-  return [Header(book), ...contents, Footer(book)];
+  return [Header(book), main(...contents), Footer(book)];
 }
 
 export function Header(book: Book, chapter?: Section): string {
@@ -123,7 +123,7 @@ export function Chapter({
 }
 
 export function SectionTOCPage(
-  section: SectionFolder,
+  section: Section,
   depth: number = Number.MAX_SAFE_INTEGER,
   single: boolean
 ): string[] {
@@ -140,7 +140,11 @@ export function SectionTOCPage(
 }
 
 export function SectionPage(section: Section, single: boolean): string[] {
-  return Page(section.book, ...SectionComponent(section, single));
+  return [
+    Header(section.book),
+    main(...SectionComponent(section, single)),
+    Footer(section.book),
+  ];
 }
 
 const singleStyle = `

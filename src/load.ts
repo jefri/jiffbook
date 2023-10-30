@@ -3,7 +3,7 @@ import matter from "gray-matter";
 
 import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
 import { isSectionContent } from "./sections.js";
-import { Book, Section, SectionContent, SectionFolder } from "./types.js";
+import { Book, Section } from "./types.js";
 import { JiffdownSettings } from "./fs.js";
 
 /**
@@ -78,11 +78,15 @@ export function slugToName(slug: string): string {
 async function loadSectionFromFolder(
   fs: FileSystem,
   slug: string
-): Promise<SectionFolder | undefined> {
+): Promise<Section | undefined> {
   fs.pushd(slug);
   const rc = await fs.readFile(".jiffbookrc").catch((_) => "");
   const data = yaml.parse(rc) ?? {};
   if (data["skip"]) return;
+
+  const ailly = matter(await fs.readFile(".aillyrc").catch((_) => ""));
+  const markdown: string = data["content"] ?? ailly.content;
+
   const title = data["title"] ?? slugToName(slug);
   const entries = (await fs.scandir(".")).filter(
     (e) => e.name.match(/\d+_/) !== null
@@ -106,6 +110,7 @@ async function loadSectionFromFolder(
     slug,
     title,
     sections,
+    markdown,
     book: {} as Book,
   };
 }
@@ -113,7 +118,7 @@ async function loadSectionFromFolder(
 async function loadSectionFromFile(
   fs: FileSystem,
   slug: string
-): Promise<SectionContent | undefined> {
+): Promise<Section | undefined> {
   const file = await fs.readFile(slug);
   const { content: markdown, data } = matter(file);
   if (data["skip"]) return;
@@ -123,6 +128,7 @@ async function loadSectionFromFile(
     slug,
     title,
     markdown,
+    sections: [],
     book: {} as Book,
   };
 }
@@ -130,7 +136,7 @@ async function loadSectionFromFile(
 export function markSectionParents(
   section: Section,
   book: Book,
-  parent?: SectionFolder
+  parent?: Section
 ): void {
   section.book = book;
   section.parent = parent;

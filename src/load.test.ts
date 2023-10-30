@@ -62,23 +62,27 @@ test("load chapters", async () => {
         slug: "01_intro",
         title: "Intro",
         book: {} as Book,
+        markdown: "",
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
+            sections: [],
             book: {} as Book,
           },
           {
             slug: "02_foo",
             title: "Foo",
             markdown: "foo",
+            sections: [],
             book: {} as Book,
           },
           {
             slug: "03_bar",
             title: "Bar",
             markdown: "bar",
+            sections: [],
             book: {} as Book,
           },
         ],
@@ -87,17 +91,20 @@ test("load chapters", async () => {
         slug: "02_part_2",
         title: "Second Part",
         book: {} as Book,
+        markdown: "",
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "World",
+            sections: [],
             book: {} as Book,
           },
           {
             slug: "02_foo_bar_baz",
             title: "Quick Brown",
             markdown: "The foxy fox",
+            sections: [],
             book: {} as Book,
           },
         ],
@@ -111,11 +118,20 @@ test("load chapters", async () => {
   (expected.chapters[1].sections[0] as any).parent = expected.chapters[1];
   (expected.chapters[1].sections[1] as any).parent = expected.chapters[1];
 
+  (expected.chapters[0] as any).book = expected;
+  (expected.chapters[0].sections[0] as any).book = expected;
+  (expected.chapters[0].sections[1] as any).book = expected;
+  (expected.chapters[0].sections[2] as any).book = expected;
+  (expected.chapters[1] as any).book = expected;
+  (expected.chapters[1].sections[0] as any).book = expected;
+  (expected.chapters[1].sections[1] as any).book = expected;
+
   expect(book).toEqual<Book>(expected);
 });
 
 test("load chapters ignores .git, .gitignore, and out", async () => {
   const fs = new GitAwareFs(
+    "/",
     new ObjectFileSystemAdapter({
       ".git": {
         config: "author",
@@ -144,11 +160,13 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
         title: "Intro",
         parent: undefined,
         book: {} as Book,
+        markdown: "",
         sections: [
           {
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
+            sections: [],
             book: {} as Book,
           },
         ],
@@ -164,6 +182,7 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
 
 test("load chapters ignores skip", async () => {
   const fs = new GitAwareFs(
+    "/",
     new ObjectFileSystemAdapter({
       ".jiffbookrc": `title: Medina-99\nauthor: David Souther\n`,
       "01_intro": {
@@ -187,12 +206,58 @@ test("load chapters ignores skip", async () => {
         slug: "02_other",
         title: "Other",
         parent: undefined,
+        markdown: "",
         sections: [],
         book: {} as Book,
       },
     ],
   };
   expected.chapters[0].book = expected;
+
+  expect(book).toEqual<Book>(expected);
+});
+
+test("loads ailly content", async () => {
+  const fs = new GitAwareFs(
+    "/",
+    new ObjectFileSystemAdapter({
+      ".jiffbookrc": `title: Medina-99\nauthor: David Souther\n`,
+      "01_intro": {
+        ".aillyrc": "Intro",
+        "01_hello.md": "Hello",
+      },
+    })
+  );
+
+  const book = await load(fs, {} as JiffdownSettings);
+  const expected: Book = {
+    cover: {
+      title: "Medina-99",
+      author: "David Souther",
+    },
+    chapters: [
+      {
+        slug: "01_intro",
+        title: "Intro",
+        parent: undefined,
+        markdown: "Intro",
+        sections: [
+          {
+            slug: "01_hello",
+            title: "Hello",
+            parent: undefined,
+            markdown: "Hello",
+            book: {} as Book,
+            sections: [],
+          },
+        ],
+        book: {} as Book,
+      },
+    ],
+  };
+  expected.chapters[0].book = expected;
+  expected.chapters[0].sections[0].book = expected;
+  expected.chapters[0].sections[0].parent = expected.chapters[0];
 
   expect(book).toEqual<Book>(expected);
 });

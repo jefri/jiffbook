@@ -1,4 +1,12 @@
-import { article, h2, header, main, nav } from "../dom.js";
+import {
+  article,
+  h1,
+  h2,
+  header,
+  main,
+  nav,
+  section as sectionDOM,
+} from "../dom.js";
 import {
   isSectionContent,
   nextSection,
@@ -6,18 +14,22 @@ import {
   sectionBreadcrumbs,
   sectionId,
 } from "../sections.js";
-import { Section, SectionContent } from "../types.js";
+import { Section } from "../types.js";
 import { marked } from "marked";
 import { Breadcrumbs } from "./contents.js";
 import { A } from "./util.js";
 
-export function SectionMain(section: SectionContent, single: boolean): string {
-  return main(
-    article(
-      { id: sectionId(section) },
-      header(nav(Breadcrumbs(section, single), A({ href: "#" }, "Top"))),
-      main(marked.parse(section?.markdown).trim())
-    )
+export function SectionArticle(section: Section, single: boolean): string {
+  return article(
+    { id: sectionId(section) },
+    header(
+      nav(
+        h1(section.title),
+        Breadcrumbs(section, single),
+        A({ href: "#" }, "Top")
+      )
+    ),
+    main(marked.parse(section.markdown).trim())
   );
 }
 
@@ -58,15 +70,18 @@ export function SectionLink(
   return A({ href }, text);
 }
 
-export function SectionComponent(section: Section, single: boolean): string[] {
+export function SectionComponent(section: Section, single: boolean): string {
   if (isSectionContent(section)) {
-    return [SectionMain(section, single)];
+    return SectionArticle(section, single);
   } else {
-    return [
-      section.parent
-        ? nav({ id: sectionId(section) }, ...Breadcrumbs(section, single))
-        : h2({ id: sectionId(section) }, section.title),
-      ...section.sections.map((s) => SectionComponent(s, single)).flat(),
-    ];
+    return sectionDOM(
+      header(
+        section.parent
+          ? nav({ id: sectionId(section) }, ...Breadcrumbs(section, single))
+          : h2({ id: sectionId(section) }, section.title)
+      ),
+      main(marked.parse(section.markdown).trim()),
+      ...section.sections.map((s) => SectionComponent(s, single))
+    );
   }
 }

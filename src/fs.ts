@@ -20,7 +20,7 @@ function cwdNormalize(path: string) {
 
 export async function loadFs(args: Args) {
   const root = cwdNormalize(args.values.root!);
-  const fs = new GitAwareFs(new NodeFileSystem(), root);
+  const fs = new GitAwareFs(root, new NodeFileSystem());
   const settings = {
     out: join(args.values.root!, args.values.out!),
     toc_depth: Number.parseInt(args.values["toc-depth"] ?? "99999"),
@@ -32,7 +32,7 @@ export async function loadFs(args: Args) {
 }
 
 export class GitAwareFs extends FileSystem {
-  constructor(fsa: FileSystemAdapter, cwd = process.cwd()) {
+  constructor(cwd = process.cwd(), fsa: FileSystemAdapter) {
     super(fsa);
     this.cd(cwd);
   }
