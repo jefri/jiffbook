@@ -14,7 +14,7 @@ let book: Book = {
   chapters: [],
 };
 export function setBook(b: Book) {
-  book = book;
+  book = b;
 }
 export function useBook(): Book {
   return book;

@@ -25,10 +25,6 @@ body > main {
   justify-content: space-around;
 }
 
-.table-of-contents {
-  columns: 2;
-}
-
 @media (prefers-color-scheme: dark) {
   a, [role=link] {
     --text-color: #BBBBFF;
@@ -57,4 +53,29 @@ nav .breadcrumbs li::marker {
 aside nav ul li a {
   white-space: nowrap;
 }
+
+.table-of-contents {
+  container-type: size;
+
+  & > ol {
+    columns: var(--text-columns);
+  }
+}
+
+.table-of-contents {
+  --text-columns: 1;
+}
+
+@container (width > 600px) {
+  .table-of-contents > ol {
+    --text-columns: 3;
+  }
+}
+
+@container (width > 400px) {
+  .table-of-contents > ol {
+    --text-columns: 2;
+  }
+}
+
 `;

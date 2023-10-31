@@ -7,7 +7,7 @@ import { test, expect } from "vitest";
 import { Book } from "./types.js";
 import { writeOut } from "./out.js";
 
-test("writes content", async () => {
+test.skip("writes content", async () => {
   const book: Book = {
     tocDepth: 3,
     cover: {

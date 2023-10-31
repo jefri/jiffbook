@@ -23,22 +23,23 @@ export async function writeOut({
   settings: JiffdownSettings;
 }): Promise<null> {
   setBook(book);
+  // Site main index
   await writeHtmlPage(fs, "index.html", [
-    div({ className: "cover" }, ...Cover({}, book)),
+    div({ className: "cover" }, ...Cover()),
   ]);
+  // Site table of contents
   await writeHtmlPage(
     fs,
     "toc.html",
     Page(
-      main(
-        { className: "table-of-contents" },
-        TableOfContents({ links: "absolute" }, book)
-      )
+      { className: "table-of-contents" },
+      TableOfContents({ links: "absolute" }, book)
     )
   );
   for (const chapter of book.chapters) {
     await writeSection(fs, chapter);
   }
+  // Book as a single page
   await writeHtmlPage(fs, "single.html", Single({ book }));
   return null;
 }
@@ -54,6 +55,7 @@ async function writeSection(
   } else {
     await fs.mkdir(section.slug);
     await fs.pushd(section.slug);
+    // Section as an entire page.
     await writeHtmlPage(
       fs,
       "index.html",
@@ -62,7 +64,7 @@ async function writeSection(
     await writeHtmlPage(
       fs,
       "toc.html",
-      SectionTOCPage({ depth, links: "hash" }, section)
+      SectionTOCPage({ links: "hash" }, section)
     );
     for (const s of section.sections) {
       await writeSection(fs, s);

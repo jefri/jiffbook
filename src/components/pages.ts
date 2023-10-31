@@ -48,15 +48,25 @@ export function Layout(...content: string[]): string {
   );
 }
 
-export function Page(...contents: string[]): string[] {
-  return [Header(), main(...contents), Footer()];
+export function Page(
+  attributes: { className?: string } | string,
+  ...contents: string[]
+): string[] {
+  if (typeof attributes == "string") {
+    contents.unshift(attributes);
+    attributes = {};
+  }
+  return [
+    Header(),
+    main({ className: attributes.className }, ...contents),
+    Footer(),
+  ];
 }
 
 export function Header(chapter?: Section): string {
-  const book = useBook();
   return header(
     { className: "fluid" },
-    nav(...Cover({ single: true }, book, chapter))
+    nav(...Cover({ single: true }, chapter))
   );
 }
 
@@ -69,10 +79,10 @@ export function Footer(): string {
 }
 
 export function Cover(
-  { single = false }: { single?: boolean },
-  book: Book,
+  { single = false }: { single?: boolean } = {},
   chapter?: Section
 ): string[] {
+  const book = useBook();
   return chapter
     ? [
         "<!-- Cover -->",
@@ -123,13 +133,7 @@ export function Chapter({
 }
 
 export function SectionTOCPage(
-  {
-    depth = Number.MAX_SAFE_INTEGER,
-    links = "absolute",
-  }: {
-    depth?: number;
-    links?: LinkMode;
-  },
+  { links = "absolute" }: { links?: LinkMode },
   section: Section
 ): string[] {
   return Page(
@@ -137,19 +141,15 @@ export function SectionTOCPage(
       Breadcrumbs({ links }, section),
       div(
         { className: "table-of-contents" },
-        TableOfContentsList({ depth, links }, ...section.sections)
+        TableOfContentsList({ links }, ...section.sections)
       )
     )
   );
 }
 
 export function SectionPage(
-  {
-    links = "absolute",
-  }: {
-    links?: LinkMode;
-  },
+  { links = "absolute" }: { links?: LinkMode },
   section: Section
 ): string[] {
-  return [Header(), main(SectionComponent({ links }, section)), Footer()];
+  return Page(SectionComponent({ links }, section));
 }

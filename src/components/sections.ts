@@ -5,7 +5,6 @@ import {
   header,
   main,
   nav,
-  pre,
   section as sectionDOM,
 } from "../dom.js";
 import {
