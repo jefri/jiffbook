@@ -40,9 +40,9 @@ export async function load(
   const title = rc["title"] ?? "Unknown Title";
   const author = rc["author"] ?? "Unknown Author";
   const image = rc["cover"];
-  if (rc["toc_depth"]) {
-    args["toc_depth"] = Number(rc["toc_depth"]);
-  }
+
+  let tocDepth = Number(rc["toc_depth"]);
+  args["toc_depth"] = isNaN(tocDepth) ? 999 : tocDepth;
 
   const chapters: Section[] = [];
 
@@ -53,6 +53,7 @@ export async function load(
       ...(image ? { image: { dest: image, source: image } } : {}),
     },
     chapters,
+    tocDepth,
   };
 
   const dirs = (await fs.scandir(".")).filter((s) => s.isDirectory());
@@ -80,9 +81,13 @@ async function loadSectionFromFolder(
   slug: string
 ): Promise<Section | undefined> {
   fs.pushd(slug);
+
   const rc = await fs.readFile(".jiffbookrc").catch((_) => "");
   const data = yaml.parse(rc) ?? {};
-  if (data["skip"]) return;
+  if (data["skip"]) {
+    fs.popd();
+    return;
+  }
 
   const ailly = matter(await fs.readFile(".aillyrc").catch((_) => ""));
   const markdown: string = data["content"] ?? ailly.content;

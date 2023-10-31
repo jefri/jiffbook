@@ -17,6 +17,7 @@ test("load cover", async () => {
   const book = await load(fs, {} as JiffdownSettings);
 
   expect(book).toEqual<Book>({
+    tocDepth: 999,
     cover: {
       title: "Medina-99",
       image: { source: "./cover.png", dest: "./cover.png" },
@@ -53,6 +54,7 @@ test("load chapters", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected = {
+    tocDepth: 999,
     cover: {
       title: "Medina-99",
       author: "David Souther",
@@ -150,6 +152,7 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected = {
+    tocDepth: 999,
     cover: {
       title: "Medina-99",
       author: "David Souther",
@@ -197,6 +200,7 @@ test("load chapters ignores skip", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected = {
+    tocDepth: 999,
     cover: {
       title: "Medina-99",
       author: "David Souther",
@@ -231,6 +235,7 @@ test("loads ailly content", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected: Book = {
+    tocDepth: 999,
     cover: {
       title: "Medina-99",
       author: "David Souther",

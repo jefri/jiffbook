@@ -9,6 +9,7 @@ import { writeOut } from "./out.js";
 
 test("writes content", async () => {
   const book: Book = {
+    tocDepth: 3,
     cover: {
       title: "Medina-99",
       author: "David Souther",

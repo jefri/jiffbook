@@ -7,6 +7,7 @@ export interface Book {
     license?: License;
   };
   chapters: Section[];
+  tocDepth: number;
 }
 
 export interface Section {

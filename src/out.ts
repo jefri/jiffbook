@@ -12,6 +12,7 @@ import {
   Single,
 } from "./components/pages.js";
 import { TableOfContents } from "./components/contents.js";
+import { setBook } from "./components/util.js";
 
 export async function writeOut({
   fs,
@@ -22,17 +23,17 @@ export async function writeOut({
   book: Book;
   settings: JiffdownSettings;
 }): Promise<null> {
+  setBook(book);
   await writeHtmlPage(fs, "index.html", [
-    div({ className: "cover" }, ...Cover(book)),
+    div({ className: "cover" }, ...Cover({}, book)),
   ]);
   await writeHtmlPage(
     fs,
     "toc.html",
     Page(
-      book,
       main(
         { className: "table-of-contents" },
-        TableOfContents(book, 999, "absolute")
+        TableOfContents({ links: "absolute" }, book)
       )
     )
   );
@@ -50,12 +51,20 @@ async function writeSection(
 ) {
   if (isSectionContent(section)) {
     const path = pathForSection(section);
-    writeHtmlPage(fs, path, SectionPage(section, "hash"));
+    writeHtmlPage(fs, path, SectionPage({ links: "hash" }, section));
   } else {
     await fs.mkdir(section.slug);
     await fs.pushd(section.slug);
-    await writeHtmlPage(fs, "index.html", SectionPage(section, "hash"));
-    await writeHtmlPage(fs, "toc.html", SectionTOCPage(section, depth, "hash"));
+    await writeHtmlPage(
+      fs,
+      "index.html",
+      SectionPage({ links: "hash" }, section)
+    );
+    await writeHtmlPage(
+      fs,
+      "toc.html",
+      SectionTOCPage({ depth, links: "hash" }, section)
+    );
     for (const s of section.sections) {
       await writeSection(fs, s);
     }

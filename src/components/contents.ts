@@ -11,38 +11,65 @@ import { A } from "./util.js";
 export type LinkMode = "hash" | "relative" | "absolute";
 
 export function TableOfContents(
-  book: Book,
-  depth = Number.MAX_SAFE_INTEGER,
-  links: LinkMode
+  {
+    links = "absolute",
+  }: {
+    links?: LinkMode;
+  },
+  book: Book
 ): string {
-  return TableOfContentsList(book.chapters, depth, links);
-}
-
-export function TableOfContentsList(
-  sections: Section[],
-  depth: number,
-  links: LinkMode
-): string {
-  if (sections.length === 0) return "";
-  if (sectionBreadcrumbs(sections[0]).length > depth) return "";
-  return ul(...sections.map((s) => TableOfContentsEntry(s, depth, links)));
-}
-
-export function TableOfContentsEntry(
-  section: Section,
-  depth: number,
-  links: LinkMode
-): string {
-  return li(
-    SectionLink(section, links),
-    TableOfContentsList(section.sections, depth, links)
+  return TableOfContentsList(
+    {
+      depth: book.tocDepth,
+      links,
+    },
+    ...book.chapters
   );
 }
 
-export function Breadcrumbs(section: Section, links: LinkMode): string {
+export function TableOfContentsList(
+  {
+    depth = 999,
+    links = "absolute",
+  }: {
+    depth?: number;
+    links?: LinkMode;
+  },
+
+  ...sections: Section[]
+): string {
+  if (sections.length === 0) return "";
+  if (sectionBreadcrumbs(sections[0]).length > depth) return "";
+  return ul(...sections.map((s) => TableOfContentsEntry({ links, depth }, s)));
+}
+
+export function TableOfContentsEntry(
+  {
+    depth = 999,
+    links = "absolute",
+  }: {
+    depth?: number;
+    links?: LinkMode;
+  },
+  section: Section
+): string {
+  return li(
+    SectionLink({ links }, section),
+    TableOfContentsList({ depth, links }, ...section.sections)
+  );
+}
+
+export function Breadcrumbs(
+  {
+    links = "absolute",
+  }: {
+    links?: LinkMode;
+  },
+  section: Section
+): string {
   let breadcrumbs = [];
   while (section) {
-    breadcrumbs.push(SectionLink(section, links));
+    breadcrumbs.push(SectionLink({ links }, section));
     section = section.parent!;
   }
   return ol(
@@ -53,10 +80,10 @@ export function Breadcrumbs(section: Section, links: LinkMode): string {
 
 export function SectionNav(section: Section, links: LinkMode): string {
   const navs = [
-    SectionPreviousLink(section, links),
+    SectionPreviousLink({ links }, section),
     A({ href: "/index.html" }, "Cover"),
     A({ href: "/toc.html" }, "Contents"),
-    SectionNextLink(section, links),
+    SectionNextLink({ links }, section),
   ]
     .filter((p) => p != undefined)
     .map((l) => li(l));

@@ -2,6 +2,7 @@
 import { help, makeArgs } from "./args.js";
 import { writeOut } from "./out.js";
 import { loadFs } from "./fs.js";
+import { setBook } from "./components/util.js";
 
 await main();
 async function main() {

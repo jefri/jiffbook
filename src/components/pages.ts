@@ -17,7 +17,7 @@ import {
   style,
 } from "../dom.js";
 import { Book, Section } from "../types.js";
-import { A } from "./util.js";
+import { A, useBook } from "./util.js";
 import { JiffdownSettings } from "src/fs.js";
 import {
   Breadcrumbs,
@@ -48,12 +48,16 @@ export function Layout(...content: string[]): string {
   );
 }
 
-export function Page(book: Book, ...contents: string[]): string[] {
+export function Page(...contents: string[]): string[] {
+  const book = useBook();
   return [Header(book), main(...contents), Footer(book)];
 }
 
 export function Header(book: Book, chapter?: Section): string {
-  return header({ className: "fluid" }, nav(...Cover(book, true, chapter)));
+  return header(
+    { className: "fluid" },
+    nav(...Cover({ single: true }, book, chapter))
+  );
 }
 
 export function Footer(book: Book): string {
@@ -63,7 +67,11 @@ export function Footer(book: Book): string {
   );
 }
 
-export function Cover(book: Book, single = false, chapter?: Section): string[] {
+export function Cover(
+  { single = false }: { single?: boolean },
+  book: Book,
+  chapter?: Section
+): string[] {
   return chapter
     ? [
         "<!-- Cover -->",
@@ -96,11 +104,10 @@ export function Single({
 }): string[] {
   return [
     Header(book),
-    main(...book.chapters.map((s) => SectionComponent(s, "hash")).flat()),
-    aside(
-      { id: "toc" },
-      nav(...TableOfContents(book, settings.toc_depth, "hash"))
+    main(
+      ...book.chapters.map((s) => SectionComponent({ links: "hash" }, s)).flat()
     ),
+    aside({ id: "toc" }, nav(...TableOfContents({ links: "hash" }, book))),
     Footer(book),
   ];
 }
@@ -116,36 +123,44 @@ export function Chapter({
 }): string[] {
   return [
     Header(book, chapter),
-    main(...SectionComponent(chapter, "hash")),
-    aside(
-      { id: "toc" },
-      nav(...TableOfContents(book, settings.toc_depth, "hash"))
-    ),
+    main(...SectionComponent({ links: "hash" }, chapter)),
+    aside({ id: "toc" }, nav(...TableOfContents({ links: "hash" }, book))),
     Footer(book),
   ];
 }
 
 export function SectionTOCPage(
-  section: Section,
-  depth: number = Number.MAX_SAFE_INTEGER,
-  links: LinkMode
+  {
+    depth = Number.MAX_SAFE_INTEGER,
+    links = "absolute",
+  }: {
+    depth?: number;
+    links?: LinkMode;
+  },
+  section: Section
 ): string[] {
   return Page(
-    section.book,
     main(
-      Breadcrumbs(section, links),
+      Breadcrumbs({ links }, section),
       div(
         { className: "table-of-contents" },
-        TableOfContentsList(section.sections, depth, links)
+        TableOfContentsList({ depth, links }, ...section.sections)
       )
     )
   );
 }
 
-export function SectionPage(section: Section, links: LinkMode): string[] {
+export function SectionPage(
+  {
+    links = "absolute",
+  }: {
+    links?: LinkMode;
+  },
+  section: Section
+): string[] {
   return [
     Header(section.book),
-    main(...SectionComponent(section, links)),
+    main(...SectionComponent({ links }, section)),
     Footer(section.book),
   ];
 }
