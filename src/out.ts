@@ -16,7 +16,6 @@ import { setBook } from "./components/util.js";
 
 export async function writeOut({
   fs,
-  settings,
   book,
 }: {
   fs: FileSystem;
@@ -40,7 +39,7 @@ export async function writeOut({
   for (const chapter of book.chapters) {
     await writeSection(fs, chapter);
   }
-  await writeHtmlPage(fs, "single.html", Single({ settings, book }));
+  await writeHtmlPage(fs, "single.html", Single({ book }));
   return null;
 }
 

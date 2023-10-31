@@ -18,7 +18,6 @@ import {
 } from "../dom.js";
 import { Book, Section } from "../types.js";
 import { A, useBook } from "./util.js";
-import { JiffdownSettings } from "src/fs.js";
 import {
   Breadcrumbs,
   LinkMode,
@@ -26,6 +25,7 @@ import {
   TableOfContentsList,
 } from "./contents.js";
 import { SectionComponent } from "./sections.js";
+import { singleStyle } from "./style.js";
 
 export function Layout(...content: string[]): string {
   return html(
@@ -49,18 +49,19 @@ export function Layout(...content: string[]): string {
 }
 
 export function Page(...contents: string[]): string[] {
-  const book = useBook();
-  return [Header(book), main(...contents), Footer(book)];
+  return [Header(), main(...contents), Footer()];
 }
 
-export function Header(book: Book, chapter?: Section): string {
+export function Header(chapter?: Section): string {
+  const book = useBook();
   return header(
     { className: "fluid" },
     nav(...Cover({ single: true }, book, chapter))
   );
 }
 
-export function Footer(book: Book): string {
+export function Footer(): string {
+  const book = useBook();
   return footer(
     { className: "fluid" },
     nav(`©${new Date().getFullYear()} ${book.cover.author}`)
@@ -95,37 +96,29 @@ export function Cover(
       ];
 }
 
-export function Single({
-  book,
-  settings,
-}: {
-  book: Book;
-  settings: JiffdownSettings;
-}): string[] {
+export function Single({ book }: { book: Book }): string[] {
   return [
-    Header(book),
+    Header(),
     main(
       ...book.chapters.map((s) => SectionComponent({ links: "hash" }, s)).flat()
     ),
     aside({ id: "toc" }, nav(...TableOfContents({ links: "hash" }, book))),
-    Footer(book),
+    Footer(),
   ];
 }
 
 export function Chapter({
   book,
   chapter,
-  settings,
 }: {
   book: Book;
   chapter: Section;
-  settings: JiffdownSettings;
 }): string[] {
   return [
-    Header(book, chapter),
+    Header(chapter),
     main(...SectionComponent({ links: "hash" }, chapter)),
     aside({ id: "toc" }, nav(...TableOfContents({ links: "hash" }, book))),
-    Footer(book),
+    Footer(),
   ];
 }
 
@@ -158,70 +151,5 @@ export function SectionPage(
   },
   section: Section
 ): string[] {
-  return [
-    Header(section.book),
-    main(...SectionComponent({ links }, section)),
-    Footer(section.book),
-  ];
+  return [Header(), main(SectionComponent({ links }, section)), Footer()];
 }
-
-const singleStyle = `
-@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Orbitron:wght@400;700&family=Poppins:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
-:root {
-  --font-family-base: Poppins;
-  --font-family-header: Orbitron;
-}
-
-body {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-body > main {
-  flex-grow: 1;
-  width: 100%;
-}
-
-.cover {
-  height: 90vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
-}
-
-.table-of-contents {
-  columns: 2;
-}
-
-@media (prefers-color-scheme: dark) {
-  a, [role=link] {
-    --text-color: #BBBBFF;
-  }
-}
-
-nav .breadcrumbs li {
-  display: inline-block;
-  margin-left: 1em;
-}
-
-nav .breadcrumbs li::marker {
-  content: '→';
-}
-
-:is(body,#body,#root)>aside:has(>nav) {
-  width: min-content;
-}
-
-:is(body,#body,#root)>aside>nav {
-  max-height: 90vh;
-  overscroll-behavior: contain;
-  overflow: scroll;
-}
-
-aside nav ul li a {
-  white-space: nowrap;
-}
-`;

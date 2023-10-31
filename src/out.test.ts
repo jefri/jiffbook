@@ -16,60 +16,60 @@ test("writes content", async () => {
     },
     chapters: [
       {
+        id: "_01_intro",
         slug: "01_intro",
         title: "Intro",
         markdown: "",
         sections: [
           {
+            id: "_01_intro_01_hello",
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
             sections: [],
-            book: {} as Book,
           },
           {
+            id: "_01_intro_02_foo",
             slug: "02_foo",
             title: "Foo",
             markdown: "foo",
             sections: [],
-            book: {} as Book,
           },
           {
+            id: "_01_intro_03_bar",
             slug: "03_bar",
             title: "Bar",
             markdown: "bar",
             sections: [],
-            book: {} as Book,
           },
         ],
-        book: {} as Book,
       },
       {
-        book: {} as Book,
+        id: "_02_part_2",
         slug: "02_part_2",
         title: "Second Part",
         markdown: "",
         sections: [
           {
+            id: "_02_part_2_01_hello",
             slug: "01_hello",
             title: "Hello",
             markdown: "World",
             sections: [],
-            book: {} as Book,
           },
           {
+            id: "_02_part_2_02_foo_bar_baz",
             slug: "02_foo_bar_baz",
             title: "Quick Brown",
             markdown: "The foxy fox",
             sections: [],
-            book: {} as Book,
           },
         ],
       },
     ],
   };
   for (const chapter of book.chapters) {
-    markSectionParents(chapter, book);
+    markSectionParents(chapter);
   }
 
   const fs = new FileSystem(new ObjectFileSystemAdapter({}));

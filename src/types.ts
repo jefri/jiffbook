@@ -11,9 +11,9 @@ export interface Book {
 }
 
 export interface Section {
+  id: string; // A cache of the id from the breadcrumb.
   slug: string; // From basename.
   title: string; // Given in metadata, or inferred from basename.
-  book: Book;
   parent?: Section; // Makes it easy to look up the breadcrumb.
   sections: Section[];
   markdown: string;

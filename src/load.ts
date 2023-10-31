@@ -2,7 +2,7 @@ import * as yaml from "yaml";
 import matter from "gray-matter";
 
 import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
-import { isSectionContent } from "./sections.js";
+import { isSectionContent, sectionId } from "./sections.js";
 import { Book, Section } from "./types.js";
 import { JiffdownSettings } from "./fs.js";
 
@@ -63,7 +63,7 @@ export async function load(
   }
 
   for (const section of chapters) {
-    markSectionParents(section, book);
+    markSectionParents(section);
   }
 
   return book;
@@ -112,11 +112,11 @@ async function loadSectionFromFolder(
   fs.popd();
 
   return {
+    id: "NOT YET FILLED",
     slug,
     title,
     sections,
     markdown,
-    book: {} as Book,
   };
 }
 
@@ -134,20 +134,16 @@ async function loadSectionFromFile(
     title,
     markdown,
     sections: [],
-    book: {} as Book,
+    id: "",
   };
 }
 
-export function markSectionParents(
-  section: Section,
-  book: Book,
-  parent?: Section
-): void {
-  section.book = book;
+export function markSectionParents(section: Section, parent?: Section): void {
   section.parent = parent;
   if (!isSectionContent(section)) {
     for (const s of section.sections) {
-      markSectionParents(s, book, section);
+      markSectionParents(s, section);
     }
   }
+  section.id = sectionId(section);
 }

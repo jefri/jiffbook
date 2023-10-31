@@ -4,7 +4,7 @@ import {
 } from "@davidsouther/jiffies/lib/esm/fs.js";
 import { load, slugToName } from "./load.js";
 import { test, expect } from "vitest";
-import { Book } from "./types.js";
+import { Book, Section } from "./types.js";
 import { GitAwareFs, JiffdownSettings } from "./fs.js";
 
 test("load cover", async () => {
@@ -61,53 +61,54 @@ test("load chapters", async () => {
     },
     chapters: [
       {
+        id: "_01_intro",
         slug: "01_intro",
         title: "Intro",
-        book: {} as Book,
         markdown: "",
         sections: [
           {
+            id: "_01_intro_01_hello",
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
             sections: [],
-            book: {} as Book,
           },
           {
+            id: "_01_intro_02_foo",
             slug: "02_foo",
             title: "Foo",
             markdown: "foo",
             sections: [],
-            book: {} as Book,
           },
           {
+            id: "_01_intro_03_bar",
             slug: "03_bar",
             title: "Bar",
             markdown: "bar",
             sections: [],
-            book: {} as Book,
           },
         ],
       },
       {
+        id: "_02_part_2",
         slug: "02_part_2",
         title: "Second Part",
         book: {} as Book,
         markdown: "",
         sections: [
           {
+            id: "_02_part_2_01_hello",
             slug: "01_hello",
             title: "Hello",
             markdown: "World",
             sections: [],
-            book: {} as Book,
           },
           {
+            id: "_02_part_2_02_foo_bar_baz",
             slug: "02_foo_bar_baz",
             title: "Quick Brown",
             markdown: "The foxy fox",
             sections: [],
-            book: {} as Book,
           },
         ],
       },
@@ -119,14 +120,6 @@ test("load chapters", async () => {
   (expected.chapters[0].sections[2] as any).parent = expected.chapters[0];
   (expected.chapters[1].sections[0] as any).parent = expected.chapters[1];
   (expected.chapters[1].sections[1] as any).parent = expected.chapters[1];
-
-  (expected.chapters[0] as any).book = expected;
-  (expected.chapters[0].sections[0] as any).book = expected;
-  (expected.chapters[0].sections[1] as any).book = expected;
-  (expected.chapters[0].sections[2] as any).book = expected;
-  (expected.chapters[1] as any).book = expected;
-  (expected.chapters[1].sections[0] as any).book = expected;
-  (expected.chapters[1].sections[1] as any).book = expected;
 
   expect(book).toEqual<Book>(expected);
 });
@@ -159,26 +152,26 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
     },
     chapters: [
       {
+        id: "_01_intro",
         slug: "01_intro",
         title: "Intro",
         parent: undefined,
-        book: {} as Book,
         markdown: "",
         sections: [
           {
+            id: "_01_intro_01_hello",
             slug: "01_hello",
             title: "Hello",
             markdown: "Hello",
             sections: [],
-            book: {} as Book,
+            parent: undefined,
           },
         ],
       },
     ],
   };
-  (expected.chapters[0].sections[0] as any).parent = expected.chapters[0];
-  expected.chapters[0].book = expected;
-  (expected.chapters[0].sections[0] as any).book = expected;
+  (expected.chapters[0].sections[0].parent as unknown as Section) =
+    expected.chapters[0];
 
   expect(book).toEqual<Book>(expected);
 });
@@ -207,16 +200,15 @@ test("load chapters ignores skip", async () => {
     },
     chapters: [
       {
+        id: "_02_other",
         slug: "02_other",
         title: "Other",
         parent: undefined,
         markdown: "",
         sections: [],
-        book: {} as Book,
       },
     ],
   };
-  expected.chapters[0].book = expected;
 
   expect(book).toEqual<Book>(expected);
 });
@@ -242,26 +234,24 @@ test("loads ailly content", async () => {
     },
     chapters: [
       {
+        id: "_01_intro",
         slug: "01_intro",
         title: "Intro",
         parent: undefined,
         markdown: "Intro",
         sections: [
           {
+            id: "_01_intro_01_hello",
             slug: "01_hello",
             title: "Hello",
             parent: undefined,
             markdown: "Hello",
-            book: {} as Book,
             sections: [],
           },
         ],
-        book: {} as Book,
       },
     ],
   };
-  expected.chapters[0].book = expected;
-  expected.chapters[0].sections[0].book = expected;
   expected.chapters[0].sections[0].parent = expected.chapters[0];
 
   expect(book).toEqual<Book>(expected);
