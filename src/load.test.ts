@@ -17,6 +17,7 @@ test("load cover", async () => {
   const book = await load(fs, {} as JiffdownSettings);
 
   expect(book).toEqual<Book>({
+    styles: [],
     tocDepth: 999,
     cover: {
       title: "Medina-99",
@@ -55,6 +56,7 @@ test("load chapters", async () => {
   const book = await load(fs, {} as JiffdownSettings);
   const expected = {
     tocDepth: 999,
+    styles: [],
     cover: {
       title: "Medina-99",
       author: "David Souther",
@@ -93,7 +95,6 @@ test("load chapters", async () => {
         id: "_02_part_2",
         slug: "02_part_2",
         title: "Second Part",
-        book: {} as Book,
         markdown: "",
         sections: [
           {
@@ -113,7 +114,7 @@ test("load chapters", async () => {
         ],
       },
     ],
-  };
+  } satisfies Book;
 
   (expected.chapters[0].sections[0] as any).parent = expected.chapters[0];
   (expected.chapters[0].sections[1] as any).parent = expected.chapters[0];
@@ -145,6 +146,7 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected = {
+    styles: [],
     tocDepth: 999,
     cover: {
       title: "Medina-99",
@@ -169,7 +171,7 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
         ],
       },
     ],
-  };
+  } satisfies Book;
   (expected.chapters[0].sections[0].parent as unknown as Section) =
     expected.chapters[0];
 
@@ -193,6 +195,7 @@ test("load chapters ignores skip", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected = {
+    styles: [],
     tocDepth: 999,
     cover: {
       title: "Medina-99",
@@ -208,7 +211,7 @@ test("load chapters ignores skip", async () => {
         sections: [],
       },
     ],
-  };
+  } satisfies Book;
 
   expect(book).toEqual<Book>(expected);
 });
@@ -227,6 +230,7 @@ test("loads ailly content", async () => {
 
   const book = await load(fs, {} as JiffdownSettings);
   const expected: Book = {
+    styles: [],
     tocDepth: 999,
     cover: {
       title: "Medina-99",

@@ -12,6 +12,7 @@ let book: Book = {
   },
   tocDepth: 999,
   chapters: [],
+  styles: [],
 };
 export function setBook(b: Book) {
   book = b;

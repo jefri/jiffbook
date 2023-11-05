@@ -8,6 +8,7 @@ export interface Book {
   };
   chapters: Section[];
   tocDepth: number;
+  styles: string[];
 }
 
 export interface Section {

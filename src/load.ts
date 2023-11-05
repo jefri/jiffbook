@@ -23,7 +23,7 @@ export async function load(
   fs: FileSystem,
   args: JiffdownSettings
 ): Promise<Book> {
-  let rc: Record<string, string>;
+  let rc: Record<string, unknown>;
   try {
     let packageJson = await fs.readFile("package.json");
     let pkg = JSON.parse(packageJson);
@@ -37,9 +37,10 @@ export async function load(
     }
   }
 
-  const title = rc["title"] ?? "Unknown Title";
-  const author = rc["author"] ?? "Unknown Author";
-  const image = rc["cover"];
+  const title = (rc["title"] as string) ?? "Unknown Title";
+  const author = (rc["author"] as string) ?? "Unknown Author";
+  const image = rc["cover"] as string | undefined;
+  const styles = rc["styles"] as string[]; // TODO ensure they're a string list
 
   let tocDepth = Number(rc["toc_depth"]);
   args["toc_depth"] = isNaN(tocDepth) ? 999 : tocDepth;
@@ -54,6 +55,7 @@ export async function load(
     },
     chapters,
     tocDepth,
+    styles,
   };
 
   const dirs = (await fs.scandir(".")).filter((s) => s.isDirectory());

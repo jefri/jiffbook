@@ -28,6 +28,7 @@ import { SectionComponent } from "./sections.js";
 import { singleStyle } from "./style.js";
 
 export function Layout(...content: string[]): string {
+  const book = useBook();
   return html(
     { lang: "en" },
     head(
@@ -37,7 +38,7 @@ export function Layout(...content: string[]): string {
         type: "text/css",
         href: "https://unpkg.com/@davidsouther/jiffies-css",
       }),
-      style(singleStyle)
+      ...book.styles.map((href) => link({ href, rel: "stylesheet" }))
     ),
     body(
       ...content,

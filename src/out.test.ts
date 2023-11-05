@@ -9,6 +9,7 @@ import { writeOut } from "./out.js";
 
 test.skip("writes content", async () => {
   const book: Book = {
+    styles: [],
     tocDepth: 3,
     cover: {
       title: "Medina-99",
