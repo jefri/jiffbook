@@ -33,7 +33,7 @@ export async function writeOut({
     "toc.html",
     Page(
       { className: "table-of-contents" },
-      TableOfContents({ links: "absolute" }, book)
+      TableOfContents({ links: "relative" }, book)
     )
   );
   for (const chapter of book.chapters) {
@@ -44,14 +44,10 @@ export async function writeOut({
   return null;
 }
 
-async function writeSection(
-  fs: FileSystem,
-  section: Section,
-  depth: number = -1
-) {
+async function writeSection(fs: FileSystem, section: Section) {
   if (isSectionContent(section)) {
     const path = pathForSection(section);
-    writeHtmlPage(fs, path, SectionPage({ links: "hash" }, section));
+    writeHtmlPage(fs, path, SectionPage({ links: "relative" }, section));
   } else {
     await fs.mkdir(section.slug);
     await fs.pushd(section.slug);
@@ -64,7 +60,7 @@ async function writeSection(
     await writeHtmlPage(
       fs,
       "toc.html",
-      SectionTOCPage({ links: "hash" }, section)
+      SectionTOCPage({ links: "relative" }, section)
     );
     for (const s of section.sections) {
       await writeSection(fs, s);

@@ -8,7 +8,8 @@ export interface Book {
   };
   chapters: Section[];
   tocDepth: number;
-  styles: string[];
+  styles?: string[] | undefined;
+  scripts?: string[] | undefined;
 }
 
 export interface Section {
@@ -30,4 +31,8 @@ export interface License {
   short: string;
   spdx: string;
   full: string;
+}
+
+export function isDefined<T>(t: T | undefined): t is T {
+  return t !== undefined;
 }

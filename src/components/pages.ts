@@ -13,19 +13,16 @@ import {
   main,
   meta,
   nav,
-  script,
-  style,
 } from "../dom.js";
 import { Book, Section } from "../types.js";
 import { A, useBook } from "./util.js";
 import {
   Breadcrumbs,
-  LinkMode,
   TableOfContents,
   TableOfContentsList,
 } from "./contents.js";
 import { SectionComponent } from "./sections.js";
-import { singleStyle } from "./style.js";
+import { LinkMode } from "src/sections.js";
 
 export function Layout(...content: string[]): string {
   const book = useBook();
@@ -33,18 +30,11 @@ export function Layout(...content: string[]): string {
     { lang: "en" },
     head(
       meta({ charset: "utf-8" } as any),
-      link({
-        rel: "stylesheet",
-        type: "text/css",
-        href: "https://unpkg.com/@davidsouther/jiffies-css",
-      }),
-      ...book.styles.map((href) => link({ href, rel: "stylesheet" }))
+      ...(book.styles ?? []).map((href) => link({ href, rel: "stylesheet" }))
     ),
     body(
       ...content,
-      script({
-        src: "https://unpkg.com/@davidsouther/jiffies-css/accessibility.js",
-      })
+      ...(book.scripts ?? []).map((href) => link({ href, rel: "stylesheet" }))
     )
   );
 }
@@ -87,12 +77,12 @@ export function Cover(
   return chapter
     ? [
         "<!-- Cover -->",
-        h1(A({ href: "/" }, book.cover.title)),
+        h1(A({ href: "." }, book.cover.title)),
         h2(A({ href: "." }, chapter.title)),
       ]
     : [
         "<!-- Cover -->",
-        h1(A({ href: "/" }, book.cover.title)),
+        h1(A({ href: "." }, book.cover.title)),
         ...(book.cover.subtitle ? [] : h2(book.cover.subtitle)),
         h3("By ", book.cover.author),
         ...(single
@@ -137,15 +127,16 @@ export function SectionTOCPage(
   { links = "absolute" }: { links?: LinkMode },
   section: Section
 ): string[] {
-  return Page(
-    main(
-      Breadcrumbs({ links }, section),
-      div(
-        { className: "table-of-contents" },
-        TableOfContentsList({ links }, ...section.sections)
-      )
-    )
-  );
+  return [];
+  // return Page(
+  //   main(
+  //     Breadcrumbs({ links }, section),
+  //     div(
+  //       { className: "table-of-contents" },
+  //       TableOfContentsList({ links, src: section }, ...section.sections)
+  //     )
+  //   )
+  // );
 }
 
 export function SectionPage(

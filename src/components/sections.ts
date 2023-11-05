@@ -1,22 +1,26 @@
 import {
   article,
+  footer,
   h1,
   h2,
   header,
+  li,
   main,
   nav,
+  ol,
   section as sectionDOM,
 } from "../dom.js";
 import {
+  LinkMode,
+  getLink,
   isSectionContent,
   nextSection,
   previousSection,
-  sectionBreadcrumbs,
   sectionId,
 } from "../sections.js";
-import { Section } from "../types.js";
+import { Section, isDefined } from "../types.js";
 import { marked } from "marked";
-import { Breadcrumbs, LinkMode } from "./contents.js";
+import { Breadcrumbs } from "./contents.js";
 import { A } from "./util.js";
 
 export function SectionArticle({
@@ -35,61 +39,57 @@ export function SectionArticle({
         A({ href: "#" }, "Top")
       )
     ),
-    main(marked.parse(section.markdown).trim())
+    main(marked.parse(section.markdown).trim()),
+    footer(SectionNav({}, section))
   );
 }
 
 export function SectionNextLink(
-  {
-    links = "absolute",
-  }: {
-    links?: LinkMode;
-  },
+  { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string | undefined {
   let next = nextSection(section);
   if (!next) return undefined;
-  return SectionLink({ links }, next, `Next: ${next.title}`);
+  return SectionLink({ links, src }, next, `Next: ${next.title}`);
 }
 
 export function SectionPreviousLink(
-  { links = "absolute" }: { links?: LinkMode },
+  { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string | undefined {
   let previous = previousSection(section);
   if (!previous) return undefined;
-  return SectionLink({ links }, previous, `Previous: ${previous.title}`);
+  return SectionLink({ links, src }, previous, `Previous: ${previous.title}`);
 }
 
 export function SectionLink(
-  {
-    links,
-  }: {
-    links: LinkMode;
-  },
+  { links, src }: { links: LinkMode; src?: Section },
   section: Section,
   text = section.title
 ): string {
-  let href;
-  if (links === "hash") {
-    href = "#" + encodeURIComponent(sectionId(section));
-  } else {
-    if (isSectionContent(section)) {
-      href = "/" + sectionBreadcrumbs(section).reverse().join("/") + ".html";
-    } else {
-      href =
-        "/" + sectionBreadcrumbs(section).reverse().join("/") + "/index.html";
-    }
-  }
+  const href = getLink({ links, dest: section, src });
   return A({ href }, text);
 }
 
+export function SectionNav(
+  { src }: { src?: Section },
+  section: Section
+): string {
+  const prev = SectionPreviousLink(
+    { links: "relative", src: src ?? section },
+    section
+  );
+  const next = SectionNextLink(
+    { links: "relative", src: src ?? section },
+    section
+  );
+  return prev || next
+    ? nav(ol(...[prev, next].filter(isDefined).map((n) => li(n))))
+    : "";
+}
+
 export function SectionComponent(
-  {
-    links = "absolute",
-  }: {
-    links?: LinkMode;
-  },
+  { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string {
   if (isSectionContent(section)) {
@@ -98,11 +98,20 @@ export function SectionComponent(
     return sectionDOM(
       header(
         section.parent
-          ? nav({ id: sectionId(section) }, ...Breadcrumbs({ links }, section))
+          ? nav(
+              { id: sectionId(section) },
+              ...Breadcrumbs(
+                { links: "relative", src: src ?? section },
+                section
+              )
+            )
           : h2({ id: sectionId(section) }, section.title)
       ),
       main(marked.parse(section.markdown).trim()),
-      ...section.sections.map((s) => SectionComponent({ links }, s))
+      ...section.sections.map((s) =>
+        SectionComponent({ links, src: src ?? section }, s)
+      ),
+      footer(...SectionNav({ src: src ?? section }, section))
     );
   }
 }

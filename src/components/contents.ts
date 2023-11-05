@@ -1,5 +1,5 @@
-import { li, nav, ol, ul } from "../dom.js";
-import { sectionBreadcrumbs } from "../sections.js";
+import { li, nav, ol } from "../dom.js";
+import { LinkMode, sectionBreadcrumbs } from "../sections.js";
 import { Book, Section } from "../types.js";
 import {
   SectionLink,
@@ -7,8 +7,6 @@ import {
   SectionPreviousLink,
 } from "./sections.js";
 import { A, useBook } from "./util.js";
-
-export type LinkMode = "hash" | "relative" | "absolute";
 
 export function TableOfContents(
   { links = "absolute" }: { links?: LinkMode },
@@ -18,31 +16,31 @@ export function TableOfContents(
 }
 
 export function TableOfContentsList(
-  { links = "absolute" }: { links?: LinkMode },
+  { links = "absolute", src }: { links?: LinkMode; src?: Section },
   ...sections: Section[]
 ): string {
   if (sections.length === 0) return "";
   if (sectionBreadcrumbs(sections[0]).length > useBook().tocDepth) return "";
-  return ol(...sections.map((s) => TableOfContentsEntry({ links }, s)));
+  return ol(...sections.map((s) => TableOfContentsEntry({ links, src }, s)));
 }
 
 export function TableOfContentsEntry(
-  { links = "absolute" }: { links?: LinkMode },
+  { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string {
   return li(
-    SectionLink({ links }, section),
-    TableOfContentsList({ links }, ...section.sections)
+    SectionLink({ links, src }, section),
+    TableOfContentsList({ links, src }, ...section.sections)
   );
 }
 
 export function Breadcrumbs(
-  { links = "absolute" }: { links?: LinkMode },
+  { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string {
   let breadcrumbs = [];
   while (section) {
-    breadcrumbs.push(SectionLink({ links }, section));
+    breadcrumbs.push(SectionLink({ links, src }, section));
     section = section.parent!;
   }
   return ol(

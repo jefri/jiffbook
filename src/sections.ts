@@ -42,3 +42,44 @@ export function previousSection(section: Section): Section | undefined {
 export function sectionId(section: Section): string {
   return sectionBreadcrumbs(section).reverse().join("_");
 }
+
+export type LinkMode = "hash" | "relative" | "absolute";
+export function getLink({
+  links,
+  dest,
+  src,
+}: {
+  links: LinkMode;
+  dest: Section;
+  src?: Section;
+}) {
+  if (links === "hash") return "#" + encodeURIComponent(sectionId(dest));
+  const isContent = isSectionContent(dest);
+  const end = isContent ? ".html" : "/index.html";
+  const relative = [];
+  const destLink = sectionBreadcrumbs(dest);
+  if (links === "relative") {
+    const srcLink = src ? sectionBreadcrumbs(src) : [];
+    while (
+      (srcLink.length > 0 || destLink.length > 0) &&
+      srcLink.at(-1) === destLink.at(-1)
+    ) {
+      srcLink.pop();
+      destLink.pop();
+    }
+    const relCount = srcLink.length + (isContent ? -1 : 0);
+    if (relCount > 0) {
+      for (let i = 0; i < relCount; i++) {
+        relative.push("..");
+      }
+    } else {
+      relative.push(".");
+    }
+  }
+  return (
+    relative.join("/") +
+    "/" +
+    destLink.reverse().join("/") +
+    end
+  ).replace("//", "/");
+}
