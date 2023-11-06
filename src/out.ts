@@ -65,6 +65,11 @@ async function writeSection(fs: FileSystem, section: Section) {
     for (const s of section.sections) {
       await writeSection(fs, s);
     }
+    await writeHtmlPage(
+      fs,
+      "single.html",
+      SectionTOCPage({ links: "relative" }, section)
+    );
     fs.popd();
   }
 }

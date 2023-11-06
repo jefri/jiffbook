@@ -21,7 +21,7 @@ import {
 import { Section, isDefined } from "../types.js";
 import { marked } from "marked";
 import { Breadcrumbs } from "./contents.js";
-import { A } from "./util.js";
+import { A, C } from "./util.js";
 
 export function SectionArticle({
   section,
@@ -49,8 +49,11 @@ export function SectionNextLink(
   section: Section
 ): string | undefined {
   let next = nextSection(section);
-  if (!next) return undefined;
-  return SectionLink({ links, src }, next, `Next: ${next.title}`);
+  if (!next) return "";
+  return (
+    C("Section Next Link") +
+    SectionLink({ links, src }, next, `Next: ${next.title}`)
+  );
 }
 
 export function SectionPreviousLink(
@@ -58,8 +61,11 @@ export function SectionPreviousLink(
   section: Section
 ): string | undefined {
   let previous = previousSection(section);
-  if (!previous) return undefined;
-  return SectionLink({ links, src }, previous, `Previous: ${previous.title}`);
+  if (!previous) return "";
+  return (
+    C("Section Previous Link") +
+    SectionLink({ links, src }, previous, `Previous: ${previous.title}`)
+  );
 }
 
 export function SectionLink(
@@ -83,35 +89,42 @@ export function SectionNav(
     { links: "relative", src: src ?? section },
     section
   );
-  return prev || next
-    ? nav(ol(...[prev, next].filter(isDefined).map((n) => li(n))))
-    : "";
+  return (
+    C(`SectionNav for ${section.id}`) +
+    nav(ol(...[prev, next].filter(isDefined).map((n) => li(n))))
+  );
 }
 
 export function SectionComponent(
   { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string {
+  const c = C(
+    `${section.parent ? "Section" : "Chapter"} ${section.id} (links: ${links})`
+  );
   if (isSectionContent(section)) {
-    return SectionArticle({ section, links });
+    return c + SectionArticle({ section, links });
   } else {
-    return sectionDOM(
-      header(
-        section.parent
-          ? nav(
-              { id: sectionId(section) },
-              ...Breadcrumbs(
-                { links: "relative", src: src ?? section },
-                section
+    return (
+      c +
+      sectionDOM(
+        header(
+          section.parent
+            ? nav(
+                { id: sectionId(section) },
+                ...Breadcrumbs(
+                  { links: "relative", src: src ?? section },
+                  section
+                )
               )
-            )
-          : h2({ id: sectionId(section) }, section.title)
-      ),
-      main(marked.parse(section.markdown).trim()),
-      ...section.sections.map((s) =>
-        SectionComponent({ links, src: src ?? section }, s)
-      ),
-      footer(...SectionNav({ src: src ?? section }, section))
+            : h2({ id: sectionId(section) }, section.title)
+        ),
+        main(marked.parse(section.markdown).trim()),
+        // ...section.sections.map((s) =>
+        //   SectionComponent({ links, src: src ?? section }, s)
+        // ),
+        footer(...SectionNav({ src: src ?? section }, section))
+      )
     );
   }
 }

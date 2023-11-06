@@ -15,14 +15,14 @@ import {
   nav,
 } from "../dom.js";
 import { Book, Section } from "../types.js";
-import { A, useBook } from "./util.js";
+import { A, C, useBook } from "./util.js";
 import {
   Breadcrumbs,
   TableOfContents,
   TableOfContentsList,
 } from "./contents.js";
 import { SectionComponent } from "./sections.js";
-import { LinkMode } from "src/sections.js";
+import { LinkMode, sectionBreadcrumbs } from "../sections.js";
 
 export function Layout(...content: string[]): string {
   const book = useBook();
@@ -40,7 +40,7 @@ export function Layout(...content: string[]): string {
 }
 
 export function Page(
-  attributes: { className?: string } | string,
+  attributes: { className?: string; depth?: number } | string,
   ...contents: string[]
 ): string[] {
   if (typeof attributes == "string") {
@@ -48,16 +48,23 @@ export function Page(
     attributes = {};
   }
   return [
-    Header(),
+    C("General Page"),
+    Header({ depth: attributes.depth }),
     main({ className: attributes.className }, ...contents),
     Footer(),
   ];
 }
 
-export function Header(chapter?: Section): string {
+export function Header({
+  depth,
+  chapter,
+}: {
+  depth?: number;
+  chapter?: Section;
+}): string {
   return header(
     { className: "fluid" },
-    nav(...Cover({ single: true }, chapter))
+    nav(...Cover({ single: true, depth }, chapter))
   );
 }
 
@@ -70,19 +77,26 @@ export function Footer(): string {
 }
 
 export function Cover(
-  { single = false }: { single?: boolean } = {},
+  { single = false, depth = 0 }: { single?: boolean; depth?: number } = {},
   chapter?: Section
 ): string[] {
   const book = useBook();
   return chapter
     ? [
-        "<!-- Cover -->",
-        h1(A({ href: "." }, book.cover.title)),
+        C("Chapter Cover"),
+        h1(A({ href: "../" }, book.cover.title)),
         h2(A({ href: "." }, chapter.title)),
       ]
     : [
-        "<!-- Cover -->",
-        h1(A({ href: "." }, book.cover.title)),
+        C("Book Cover"),
+        h1(
+          A(
+            {
+              href: depth === 0 ? "./" : new Array(depth).fill("..").join("/"),
+            },
+            book.cover.title
+          )
+        ),
         ...(book.cover.subtitle ? [] : h2(book.cover.subtitle)),
         h3("By ", book.cover.author),
         ...(single
@@ -99,7 +113,8 @@ export function Cover(
 
 export function Single({ book }: { book: Book }): string[] {
   return [
-    Header(),
+    C("Book Single Page"),
+    Header({ depth: 0 }),
     main(
       ...book.chapters.map((s) => SectionComponent({ links: "hash" }, s)).flat()
     ),
@@ -116,7 +131,8 @@ export function Chapter({
   chapter: Section;
 }): string[] {
   return [
-    Header(chapter),
+    C("Chapter Page"),
+    Header({ depth: 1, chapter }),
     main(...SectionComponent({ links: "hash" }, chapter)),
     aside({ id: "toc" }, nav(...TableOfContents({ links: "hash" }, book))),
     Footer(),
@@ -127,21 +143,29 @@ export function SectionTOCPage(
   { links = "absolute" }: { links?: LinkMode },
   section: Section
 ): string[] {
-  return [];
-  // return Page(
-  //   main(
-  //     Breadcrumbs({ links }, section),
-  //     div(
-  //       { className: "table-of-contents" },
-  //       TableOfContentsList({ links, src: section }, ...section.sections)
-  //     )
-  //   )
-  // );
+  return Page(
+    {
+      className: "table-of-contents",
+      depth: sectionBreadcrumbs(section).length,
+    },
+    C("Section TOC Page"),
+    main(
+      Breadcrumbs({ links }, section),
+      div(
+        { className: "table-of-contents" },
+        TableOfContentsList({ links, src: section }, ...section.sections)
+      )
+    )
+  );
 }
 
 export function SectionPage(
   { links = "absolute" }: { links?: LinkMode },
   section: Section
 ): string[] {
-  return Page(SectionComponent({ links }, section));
+  return Page(
+    { depth: sectionBreadcrumbs(section).length - 1 },
+    C("Section Page"),
+    SectionComponent({ links }, section)
+  );
 }

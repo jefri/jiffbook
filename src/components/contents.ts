@@ -6,13 +6,15 @@ import {
   SectionNextLink,
   SectionPreviousLink,
 } from "./sections.js";
-import { A, useBook } from "./util.js";
+import { A, C, useBook } from "./util.js";
 
 export function TableOfContents(
   { links = "absolute" }: { links?: LinkMode },
   book: Book
 ): string {
-  return TableOfContentsList({ links }, ...book.chapters);
+  return (
+    C("Table of Contents") + TableOfContentsList({ links }, ...book.chapters)
+  );
 }
 
 export function TableOfContentsList(
@@ -21,16 +23,22 @@ export function TableOfContentsList(
 ): string {
   if (sections.length === 0) return "";
   if (sectionBreadcrumbs(sections[0]).length > useBook().tocDepth) return "";
-  return ol(...sections.map((s) => TableOfContentsEntry({ links, src }, s)));
+  return (
+    C("TOContents List") +
+    ol(...sections.map((s) => TableOfContentsEntry({ links, src }, s)))
+  );
 }
 
 export function TableOfContentsEntry(
   { links = "absolute", src }: { links?: LinkMode; src?: Section },
   section: Section
 ): string {
-  return li(
-    SectionLink({ links, src }, section),
-    TableOfContentsList({ links, src }, ...section.sections)
+  return (
+    C("TOC Entry") +
+    li(
+      SectionLink({ links, src }, section),
+      TableOfContentsList({ links, src }, ...section.sections)
+    )
   );
 }
 
@@ -43,9 +51,9 @@ export function Breadcrumbs(
     breadcrumbs.push(SectionLink({ links, src }, section));
     section = section.parent!;
   }
-  return ol(
-    { className: "breadcrumbs" },
-    ...breadcrumbs.reverse().map((l) => li(l))
+  return (
+    C("Breadcrumbs") +
+    ol({ className: "breadcrumbs" }, ...breadcrumbs.reverse().map((l) => li(l)))
   );
 }
 
@@ -58,5 +66,5 @@ export function SectionNav(section: Section, links: LinkMode): string {
   ]
     .filter((p) => p != undefined)
     .map((l) => li(l));
-  return nav(ol(...navs));
+  return C("Section Nav") + nav(ol(...navs));
 }

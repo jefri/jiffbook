@@ -20,3 +20,7 @@ export function setBook(b: Book) {
 export function useBook(): Book {
   return book;
 }
+
+export function C(comment: string): string {
+  return `<!-- ${comment} -->`;
+}

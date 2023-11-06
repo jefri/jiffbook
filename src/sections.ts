@@ -1,3 +1,4 @@
+import { useBook } from "./components/util.js";
 import { Section } from "./types.js";
 
 export function isSectionContent(section: Section): boolean {
@@ -15,32 +16,45 @@ export function pathForSection(section: Section) {
   return `${section.slug}.html`;
 }
 
-export function nextSection(section: Section): Section | undefined {
-  // No parent, no next section.
-  if (!section.parent) return undefined;
-
-  if (section === section.parent.sections.at(-1)) {
-    // The section is the last in this chapter, so go to the first section of the next chapter
-    return nextSection(section.parent);
+export function nextSection(
+  section: Section,
+  previousSection?: Section
+): Section | undefined {
+  if (section.sections.length > 0 && !previousSection) {
+    return section.sections[0];
   }
 
-  const position = section.parent.sections.indexOf(section);
-  return section.parent.sections[position + 1];
+  const sections = section.parent
+    ? section.parent.sections
+    : useBook().chapters;
+
+  const self = sections.indexOf(section);
+  const next = sections[self + 1];
+  if (next) return next;
+
+  return section.parent ? nextSection(section.parent, section) : undefined;
 }
 
 export function previousSection(section: Section): Section | undefined {
-  if (!section.parent) return undefined;
+  const sections = section.parent
+    ? section.parent.sections
+    : useBook().chapters;
 
-  if (section === section.parent.sections.at(0)) {
-    return previousSection(section.parent);
-  }
+  const self = sections.indexOf(section);
+  const next = sections[self - 1];
+  if (next) return lastSection(next);
 
-  const position = section.parent.sections.indexOf(section);
-  return section.parent.sections[position - 1];
+  return section.parent;
+}
+
+export function lastSection(section: Section): Section {
+  return section.sections.length === 0
+    ? section
+    : lastSection(section.sections.at(-1)!);
 }
 
 export function sectionId(section: Section): string {
-  return sectionBreadcrumbs(section).reverse().join("_");
+  return "_" + sectionBreadcrumbs(section).reverse().join("_");
 }
 
 export type LinkMode = "hash" | "relative" | "absolute";
@@ -54,8 +68,8 @@ export function getLink({
   src?: Section;
 }) {
   if (links === "hash") return "#" + encodeURIComponent(sectionId(dest));
-  const isContent = isSectionContent(dest);
-  const end = isContent ? ".html" : "/index.html";
+  const isDestContent = isSectionContent(dest);
+  const end = isDestContent ? ".html" : "/index.html";
   const relative = [];
   const destLink = sectionBreadcrumbs(dest);
   if (links === "relative") {
@@ -67,7 +81,7 @@ export function getLink({
       srcLink.pop();
       destLink.pop();
     }
-    const relCount = srcLink.length + (isContent ? -1 : 0);
+    const relCount = srcLink.length - (src && isSectionContent(src) ? 1 : 0);
     if (relCount > 0) {
       for (let i = 0; i < relCount; i++) {
         relative.push("..");

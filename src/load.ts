@@ -40,9 +40,10 @@ export async function load(
   const title = (rc["title"] as string) ?? "Unknown Title";
   const author = (rc["author"] as string) ?? "Unknown Author";
   const image = rc["cover"] as string | undefined;
-  const styles = rc["styles"] as string[]; // TODO ensure they're a string list
+  const styles = (rc["styles"] ?? []) as string[]; // TODO ensure they're a string list
+  const scripts = (rc["scripts"] ?? []) as string[]; // TODO ensure they're a string list
 
-  let tocDepth = Number(rc["toc_depth"]);
+  let tocDepth = Number(rc["toc_depth"] ?? 999);
   args["toc_depth"] = isNaN(tocDepth) ? 999 : tocDepth;
 
   const chapters: Section[] = [];
@@ -56,6 +57,7 @@ export async function load(
     chapters,
     tocDepth,
     styles,
+    scripts,
   };
 
   const dirs = (await fs.scandir(".")).filter((s) => s.isDirectory());
