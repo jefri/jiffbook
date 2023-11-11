@@ -4,7 +4,7 @@ import matter from "gray-matter";
 import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
 import { isSectionContent, sectionId } from "./sections.js";
 import { Book, Section } from "./types.js";
-import { JiffdownSettings } from "./fs.js";
+import { JiffbookSettings } from "./fs.js";
 
 /**
  * 1. Use package.json['jiffbook'] or '.jiffbookrc', taking first in order.
@@ -21,7 +21,7 @@ import { JiffdownSettings } from "./fs.js";
  */
 export async function load(
   fs: FileSystem,
-  args: JiffdownSettings
+  args: JiffbookSettings
 ): Promise<Book> {
   let rc: Record<string, unknown>;
   try {
@@ -42,13 +42,14 @@ export async function load(
   const image = rc["cover"] as string | undefined;
   const styles = (rc["styles"] ?? []) as string[]; // TODO ensure they're a string list
   const scripts = (rc["scripts"] ?? []) as string[]; // TODO ensure they're a string list
+  const ghPages = Boolean(rc["gh_pages"]);
 
   let tocDepth = Number(rc["toc_depth"] ?? 999);
   args["toc_depth"] = isNaN(tocDepth) ? 999 : tocDepth;
 
   const chapters: Section[] = [];
 
-  const book = {
+  const book: Book = {
     cover: {
       title,
       author,
@@ -59,6 +60,10 @@ export async function load(
     styles,
     scripts,
   };
+
+  if (ghPages) {
+    book.ghPages = true;
+  }
 
   const dirs = (await fs.scandir(".")).filter((s) => s.isDirectory());
   for (const dir of dirs) {

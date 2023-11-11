@@ -22,7 +22,20 @@ async function main() {
     console.log(`Did not clean ${settings.out}`, e);
   }
   await fs.mkdir(settings.out);
-  fs.cd(settings.out);
 
+  fs.pushd(settings.out);
   await writeOut(loaded);
+  fs.popd();
+
+  // Copy static/* to out
+  for (const file of await fs.readdir("./static")) {
+    if (file === ".jiffbookrc") continue;
+    console.log(`cp static/${file} out/${file}`);
+    fs.copyFile(`static/${file}`, `out/${file}`);
+  }
+
+  if (book.ghPages) {
+    console.log("Setting .nokjekyll for github pages deployment");
+    fs.writeFile("out/.nojekyll", "");
+  }
 }

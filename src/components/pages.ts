@@ -30,6 +30,10 @@ export function Layout(...content: string[]): string {
     { lang: "en" },
     head(
       meta({ charset: "utf-8" } as any),
+      meta({
+        name: "viewport",
+        content: "width=100vw, initial-scale=1, min-scale=1, max-scale=1",
+      }),
       ...(book.styles ?? []).map((href) => link({ href, rel: "stylesheet" }))
     ),
     body(

@@ -1,5 +1,5 @@
 import { FileSystem } from "@davidsouther/jiffies/lib/esm/fs.js";
-import { JiffdownSettings } from "./fs.js";
+import { JiffbookSettings } from "./fs.js";
 import { isSectionContent, pathForSection } from "./sections.js";
 import { Book, Section } from "./types.js";
 import { div, main } from "./dom.js";
@@ -20,7 +20,7 @@ export async function writeOut({
 }: {
   fs: FileSystem;
   book: Book;
-  settings: JiffdownSettings;
+  settings: JiffbookSettings;
 }): Promise<null> {
   setBook(book);
   // Site main index

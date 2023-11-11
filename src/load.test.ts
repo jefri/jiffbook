@@ -5,7 +5,7 @@ import {
 import { load, slugToName } from "./load.js";
 import { test, expect } from "vitest";
 import { Book, Section } from "./types.js";
-import { GitAwareFs, JiffdownSettings } from "./fs.js";
+import { GitAwareFs, JiffbookSettings } from "./fs.js";
 
 test("load cover", async () => {
   const fs = new FileSystem(
@@ -14,7 +14,7 @@ test("load cover", async () => {
     })
   );
 
-  const book = await load(fs, {} as JiffdownSettings);
+  const book = await load(fs, {} as JiffbookSettings);
 
   expect(book).toEqual<Book>({
     styles: [],
@@ -54,7 +54,7 @@ test("load chapters", async () => {
     })
   );
 
-  const book = await load(fs, {} as JiffdownSettings);
+  const book = await load(fs, {} as JiffbookSettings);
   const expected = {
     tocDepth: 999,
     styles: [],
@@ -146,7 +146,7 @@ test("load chapters ignores .git, .gitignore, and out", async () => {
     })
   );
 
-  const book = await load(fs, {} as JiffdownSettings);
+  const book = await load(fs, {} as JiffbookSettings);
   const expected = {
     styles: [],
     scripts: [],
@@ -196,7 +196,7 @@ test("load chapters ignores skip", async () => {
     })
   );
 
-  const book = await load(fs, {} as JiffdownSettings);
+  const book = await load(fs, {} as JiffbookSettings);
   const expected = {
     styles: [],
     scripts: [],
@@ -232,7 +232,7 @@ test("loads ailly content", async () => {
     })
   );
 
-  const book = await load(fs, {} as JiffdownSettings);
+  const book = await load(fs, {} as JiffbookSettings);
   const expected: Book = {
     styles: [],
     scripts: [],

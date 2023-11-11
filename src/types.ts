@@ -10,6 +10,7 @@ export interface Book {
   tocDepth: number;
   styles?: string[] | undefined;
   scripts?: string[] | undefined;
+  ghPages?: true;
 }
 
 export interface Section {

@@ -8,8 +8,9 @@ import {
   Stats,
 } from "@davidsouther/jiffies/lib/esm/fs.js";
 import * as gitignoreParser from "gitignore-parser";
+import { Book } from "./types.js";
 
-export interface JiffdownSettings {
+export interface JiffbookSettings {
   out: string;
   toc_depth: number;
 }
@@ -18,7 +19,9 @@ function cwdNormalize(path: string) {
   return normalize(path[0] == "/" ? path : join(process.cwd(), path));
 }
 
-export async function loadFs(args: Args) {
+export async function loadFs(
+  args: Args
+): Promise<{ fs: FileSystem; settings: JiffbookSettings; book: Book }> {
   const root = cwdNormalize(args.values.root!);
   const fs = new GitAwareFs(root, new NodeFileSystem());
   const settings = {

@@ -120,9 +120,10 @@ export function SectionComponent(
             : h2({ id: sectionId(section) }, section.title)
         ),
         main(marked.parse(section.markdown).trim()),
-        // ...section.sections.map((s) =>
-        //   SectionComponent({ links, src: src ?? section }, s)
-        // ),
+        // TODO either the sections, or the TOC, depending on whether it's a single page
+        ...section.sections.map((s) =>
+          SectionComponent({ links, src: src ?? section }, s)
+        ),
         footer(...SectionNav({ src: src ?? section }, section))
       )
     );
